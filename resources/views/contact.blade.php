@@ -50,7 +50,7 @@
 
    <nav class="navbar navbar-expand-lg navbar-light shadow-sm">
     <div class="container">
-        <a class="navbar-brand" href="{{ url('/index') }}"><span class="text-primary">One</span>-Health</a>
+        <a class="navbar-brand" href="{{ url('/index') }}"><img src="img/logo.png" width="150px" alt=""></a>
 
         <form action="#">
             <div class="input-group input-navbar">
@@ -220,7 +220,7 @@
 
       <hr>
 
-      <p id="copyright">Copyright &copy; 2020 <a href="https://macodeid.com/" target="_blank">MACode ID</a>. All right reserved</p>
+            <p id="copyright">Copyright &copy; 2024 DIIT Commitment Issue. All right reserved</p>   
     </div>
   </footer>
 

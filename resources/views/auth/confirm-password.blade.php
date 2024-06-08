@@ -1,4 +1,7 @@
 <x-guest-layout>
+    <div class="flex justify-center mb-4">
+        <a href="{{ url('/index') }}"><img src="{{ asset('img/logo.png') }}" alt="Logo" class="h-20 w-auto"></a>
+    </div>
     <div class="mb-4 text-sm text-gray-600">
         {{ __('This is a secure area of the application. Please confirm your password before continuing.') }}
     </div>

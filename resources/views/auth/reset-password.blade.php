@@ -1,4 +1,7 @@
 <x-guest-layout>
+    <div class="flex justify-center mb-4">
+        <a href="{{ url('/index') }}"><img src="{{ asset('img/logo.png') }}" alt="Logo" class="h-20 w-auto"></a>
+    </div>
     <form method="POST" action="{{ route('password.store') }}">
         @csrf
 
