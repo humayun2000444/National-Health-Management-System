@@ -291,7 +291,8 @@
 
       <hr>
 
-    <p id="copyright">Copyright &copy; 2020 <a href="https://www.youtube.com/watch?v=8F0-9wygJog" target="_blank">Commitment Issues</a>. All right reserved</p>
+    <p id="copyright">Copyright &copy; 2024 <a href="https://www.youtube.com/watch?v=8F0-9wygJog" target="_blank">Commitment
+        Issues</a>. All right reserved</p>
     </div>
   </footer>
 
