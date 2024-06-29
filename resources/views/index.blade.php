@@ -249,36 +249,42 @@
         <input type="hidden" id="appointmentSuccess" value="1">
       @endif
 
-      <form class="main-form" action="{{ route('appointments.store') }}" method="POST">
-        @csrf
-        <div class="row mt-5 ">
-          <div class="col-12 col-sm-6 py-2 wow fadeInLeft">
-            <input type="text" class="form-control" name="name" placeholder="Full name" required>
-          </div>
-          <div class="col-12 col-sm-6 py-2 wow fadeInRight">
-            <input type="text" class="form-control" name="email" placeholder="Email address.." required>
-          </div>
-          <div class="col-12 col-sm-6 py-2 wow fadeInLeft" data-wow-delay="300ms">
-            <input type="date" class="form-control" name="date" required>
-          </div>
-          <div class="col-12 col-sm-6 py-2 wow fadeInRight" data-wow-delay="300ms">
-            <select name="department" id="department" class="custom-select" required>
-              <option value="general">General Health</option>
-              <option value="cardiology">Cardiology</option>
-              <option value="dental">Dental</option>
-              <option value="neurology">Neurology</option>
-              <option value="orthopaedics">Orthopaedics</option>
-            </select>
-          </div>
-          <div class="col-12 py-2 wow fadeInUp" data-wow-delay="300ms">
-            <input type="text" class="form-control" name="number" placeholder="Number.." required>
-          </div>
-          <div class="col-12 py-2 wow fadeInUp" data-wow-delay="300ms">
-            <textarea name="message" id="message" class="form-control" rows="6" placeholder="Enter message.."></textarea>
-          </div>
+      @guest
+        <div class="alert alert-warning text-center">
+          Please <a href="{{ route('login') }}">login</a> or <a href="{{ route('register') }}">register</a> to make an appointment.
         </div>
-        <button type="submit" class="btn btn-primary mt-3 wow zoomIn">Submit Request</button>
-      </form>
+      @else
+        <form class="main-form" action="{{ route('appointments.store') }}" method="POST">
+          @csrf
+          <div class="row mt-5 ">
+            <div class="col-12 col-sm-6 py-2 wow fadeInLeft">
+              <input type="text" class="form-control" name="name" placeholder="Full name" required>
+            </div>
+            <div class="col-12 col-sm-6 py-2 wow fadeInRight">
+              <input type="text" class="form-control" name="email" placeholder="Email address.." required>
+            </div>
+            <div class="col-12 col-sm-6 py-2 wow fadeInLeft" data-wow-delay="300ms">
+              <input type="date" class="form-control" name="date" required>
+            </div>
+            <div class="col-12 col-sm-6 py-2 wow fadeInRight" data-wow-delay="300ms">
+              <select name="department" id="department" class="custom-select" required>
+                <option value="general">General Health</option>
+                <option value="cardiology">Cardiology</option>
+                <option value="dental">Dental</option>
+                <option value="neurology">Neurology</option>
+                <option value="orthopaedics">Orthopaedics</option>
+              </select>
+            </div>
+            <div class="col-12 py-2 wow fadeInUp" data-wow-delay="300ms">
+              <input type="text" class="form-control" name="number" placeholder="Number.." required>
+            </div>
+            <div class="col-12 py-2 wow fadeInUp" data-wow-delay="300ms">
+              <textarea name="message" id="message" class="form-control" rows="6" placeholder="Enter message.."></textarea>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary mt-3 wow zoomIn">Submit Request</button>
+        </form>
+      @endguest
     </div> <!-- .container -->
   </div> <!-- .page-section -->
 
