@@ -7,6 +7,7 @@ use App\Models\Appointment;
 
 class AppointmentController extends Controller
 {
+    // Store method remains unchanged
     public function store(Request $request)
     {
         $request->validate([
@@ -28,5 +29,12 @@ class AppointmentController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Appointment submitted successfully!');
+    }
+
+    // New method to fetch user's appointments
+    public function userAppointments()
+    {
+        $appointments = Appointment::where('email', auth()->user()->email)->get();
+        return view('home', compact('appointments'));
     }
 }

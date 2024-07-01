@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Appointment;
 
 class HomeController extends Controller
 {
@@ -23,6 +24,10 @@ class HomeController extends Controller
      */
     public function index()
     {
-        return view('home');
+        // Fetch the user's appointments
+        $appointments = Appointment::where('email', auth()->user()->email)->get();
+
+        // Pass the appointments to the view
+        return view('home', compact('appointments'));
     }
 }
