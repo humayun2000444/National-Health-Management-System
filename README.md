@@ -9,10 +9,10 @@ DB_CONNECTION=mysql DB_HOST=127.0.0.1 DB_PORT=3306 DB_DATABASE=your database nam
 
 now run these commands
 
-php artisan key: generate
-npm install
-php artisan migrate
-composer install
+1. php artisan key: generate
+2. npm install
+3. php artisan migrate
+4. composer install
 to run the backend : in current terminal
 
 npm run dev
