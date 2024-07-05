@@ -60,21 +60,26 @@
             </li>
             @guest
               @if (Route::has('login'))
+              <!-- <li class="nav-item">
+              <a class="btn btn-primary ml-lg-3" href="#appointment">Make Appointment</a>
+            </li> -->
                 <li class="nav-item ">
-                  <a class="nav-link" href="{{ route('login') }}">{{ __('Login') }}</a>
+                  <a class="btn btn-primary" href="{{ route('login') }}">{{ __('Login') }}</a>
                 </li>
               @endif
               @if (Route::has('register'))
                 <li class="nav-item">
-                  <a class="nav-link" href="{{ route('register') }}">{{ __('Register') }}</a>
+                  <a class="btn btn-primary ml-lg-3" href="{{ route('register') }}">{{ __('Register') }}</a>
                 </li>
               @endif
             @else
               <li class="nav-item dropdown">
-                <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
+                <a id="navbarDropdown" class="btn btn-primary dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
                   {{ Auth::user()->name }}
                 </a>
                 <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+                  <a class="dropdown-item" href="{{ route('home') }}">Profile</a>
+                  </a>
                   <a class="dropdown-item" href="{{ route('logout') }}"
                      onclick="event.preventDefault();
                                document.getElementById('logout-form').submit();">
@@ -86,9 +91,6 @@
                 </div>
               </li>
             @endguest
-            <li class="nav-item">
-              <a class="btn btn-primary ml-lg-3" href="#appointment">Make Appointment</a>
-            </li>
           </ul>
         </div> <!-- .navbar-collapse -->
       </div> <!-- .container -->
@@ -100,7 +102,7 @@
       <div class="container text-center wow zoomIn">
         <span class="subhead">Let's make your life happier</span>
         <h1 class="display-4">Healthy Living</h1>
-        <a href="#" class="btn btn-primary">Let's Consult</a>
+        <a href="#appointment" class="btn btn-primary">Make Appointment</a>
       </div>
     </div>
   </div>
@@ -141,8 +143,8 @@
       <div class="container">
         <div class="row align-items-center">
           <div class="col-lg-6 py-3 wow fadeInUp">
-            <h1>Welcome to Your Health <br> Center</h1>
-            <p class="text-grey mb-4">Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Accusantium aperiam earum ipsa eius, inventore nemo labore eaque porro consequatur ex aspernatur. Explicabo, excepturi accusantium! Placeat voluptates esse ut optio facilis!</p>
+            <h1>Welcome to DIIT Health <br> Center</h1>
+            <p class="text-grey mb-4">At DIIT Health Center, we are committed to providing top-notch medical care and support to the DIIT community and beyond. Our dedicated team of healthcare professionals is here to offer comprehensive services designed to meet your health and wellness needs.</p>
             <a href="about.html" class="btn btn-primary">Learn More</a>
           </div>
           <div class="col-lg-6 wow fadeInRight" data-wow-delay="400ms">
