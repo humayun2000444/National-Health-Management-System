@@ -5,7 +5,12 @@ now open the Project folder in the VS code
 
 then rename the .env.example file to .env In .env file change the database connection section
 
-DB_CONNECTION=mysql DB_HOST=127.0.0.1 DB_PORT=3306 DB_DATABASE=your database name DB_USERNAME=your user DB_PASSWORD=your password
+DB_CONNECTION=mysql 
+DB_HOST=127.0.0.1 
+DB_PORT=3306 
+DB_DATABASE=your database name 
+DB_USERNAME=your user 
+DB_PASSWORD=your password
 
 now run these commands
 
