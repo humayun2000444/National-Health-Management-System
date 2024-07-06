@@ -213,7 +213,7 @@
     </div> <!-- .container -->
   </div> <!-- .page-section -->
 
-  <div class="page-section banner-home bg-image" style="background-image: url(img/banner-pattern.svg);">
+  <!-- <div class="page-section banner-home bg-image" style="background-image: url(img/banner-pattern.svg);">
     <div class="container py-5 py-lg-0">
       <div class="row align-items-center">
         <div class="col-lg-4 wow zoomIn">
@@ -228,7 +228,7 @@
         </div>
       </div>
     </div>
-  </div> <!-- .banner-home -->
+  </div> -->
 
  @include('layouts/footer');
 

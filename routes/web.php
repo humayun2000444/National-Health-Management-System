@@ -35,6 +35,15 @@ Route::get('/doctors', function () {
     return view('doctors');
 });
 
+
+Route::get('admin/calander', function () {
+    return view('admin.calander');
+});
+
+Route::get('admin/appoinments', function () {
+    return view('admin.appoinments');
+});
+
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth'])->name('dashboard');

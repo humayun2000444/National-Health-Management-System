@@ -14,10 +14,11 @@ DB_PASSWORD=your password
 
 now run these commands
 
-1. php artisan key: generate
+1. composer install
 2. npm install
 3. php artisan migrate
-4. composer install
+4. php artisan db:seed --class=AdminSeeder
+5. php artisan key: generate
 to run the backend : in current terminal
 
 npm run dev

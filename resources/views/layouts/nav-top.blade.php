@@ -4,9 +4,9 @@
         <div class="row">
           <div class="col-sm-8 text-sm">
             <div class="site-info">
-              <a href="#"><span class="mai-call text-primary"></span> 01815780053</a>
+              <a href="#"><span class="mai-call text-primary"></span> 000 000 0000</a>
               <span class="divider">|</span>
-              <a href="#"><span class="mai-mail text-primary"></span> muhammad.rukon242@gmail.com</a>
+              <a href="#"><span class="mai-mail text-primary"></span> diithealth@diit.edu.bd</a>
             </div>
           </div>
           <div class="col-sm-4 text-right text-sm">
