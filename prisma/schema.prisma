@@ -1,0 +1,254 @@
+// Prisma schema for Hospital Management System
+// Multi-tenant SaaS Platform
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ==================== HOSPITAL (TENANT) ====================
+
+model Hospital {
+  id             String   @id @default(cuid())
+  name           String
+  slug           String   @unique
+  logo           String?
+  email          String
+  phone          String?
+  address        String?  @db.Text
+  website        String?
+
+  // Branding
+  primaryColor   String   @default("#0F172A")
+  secondaryColor String   @default("#3B82F6")
+  accentColor    String   @default("#10B981")
+
+  // Settings (JSON for feature toggles)
+  settings       Json?
+
+  // Subscription
+  subscription   String   @default("free")
+
+  // Relations
+  admins         Admin[]
+  doctors        Doctor[]
+  patients       Patient[]
+  departments    Department[]
+  appointments   Appointment[]
+
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@map("hospitals")
+}
+
+// ==================== ADMIN ====================
+
+model Admin {
+  id             Int      @id @default(autoincrement())
+  name           String
+  email          String   @unique
+  password       String
+  phone          String?
+  avatar         String?
+  role           String   @default("admin")
+
+  hospitalId     String   @map("hospital_id")
+  hospital       Hospital @relation(fields: [hospitalId], references: [id], onDelete: Cascade)
+
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@map("admins")
+}
+
+// ==================== DOCTOR ====================
+
+model Doctor {
+  id              Int      @id @default(autoincrement())
+  name            String
+  email           String   @unique
+  password        String
+  phone           String?
+  avatar          String?
+
+  // Professional Info
+  specialization  String
+  qualification   String?
+  licenseNumber   String?  @map("license_number")
+  experience      Int?
+  bio             String?  @db.Text
+  consultationFee Decimal? @map("consultation_fee") @db.Decimal(10, 2)
+
+  // Schedule
+  availableDays   String?  @map("available_days") @db.Text
+  startTime       String?  @map("start_time")
+  endTime         String?  @map("end_time")
+  slotDuration    Int      @default(30) @map("slot_duration")
+
+  hospitalId      String   @map("hospital_id")
+  hospital        Hospital @relation(fields: [hospitalId], references: [id], onDelete: Cascade)
+
+  departmentId    Int?     @map("department_id")
+  department      Department? @relation(fields: [departmentId], references: [id])
+
+  // Relations
+  appointments    Appointment[]
+  prescriptions   Prescription[]
+  medicalRecords  MedicalRecord[]
+
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@map("doctors")
+}
+
+// ==================== PATIENT ====================
+
+model Patient {
+  id               Int       @id @default(autoincrement())
+  name             String
+  email            String    @unique
+  password         String
+  phone            String?
+  avatar           String?
+
+  // Personal Info
+  dateOfBirth      DateTime? @map("date_of_birth")
+  gender           String?
+  bloodGroup       String?   @map("blood_group")
+  address          String?   @db.Text
+  emergencyContact String?   @map("emergency_contact")
+  emergencyPhone   String?   @map("emergency_phone")
+
+  // Medical Info
+  allergies        String?   @db.Text
+  chronicConditions String?  @map("chronic_conditions") @db.Text
+
+  hospitalId       String    @map("hospital_id")
+  hospital         Hospital  @relation(fields: [hospitalId], references: [id], onDelete: Cascade)
+
+  // Relations
+  appointments     Appointment[]
+  prescriptions    Prescription[]
+  medicalRecords   MedicalRecord[]
+
+  isActive         Boolean   @default(true)
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  @@map("patients")
+}
+
+// ==================== DEPARTMENT ====================
+
+model Department {
+  id           Int      @id @default(autoincrement())
+  name         String
+  description  String?  @db.Text
+  icon         String?
+
+  hospitalId   String   @map("hospital_id")
+  hospital     Hospital @relation(fields: [hospitalId], references: [id], onDelete: Cascade)
+
+  // Relations
+  doctors      Doctor[]
+  appointments Appointment[]
+
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("departments")
+}
+
+// ==================== APPOINTMENT ====================
+
+model Appointment {
+  id           Int      @id @default(autoincrement())
+
+  patientId    Int      @map("patient_id")
+  patient      Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  doctorId     Int      @map("doctor_id")
+  doctor       Doctor   @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+
+  departmentId Int      @map("department_id")
+  department   Department @relation(fields: [departmentId], references: [id])
+
+  hospitalId   String   @map("hospital_id")
+  hospital     Hospital @relation(fields: [hospitalId], references: [id], onDelete: Cascade)
+
+  // Appointment Details
+  date         DateTime
+  startTime    String   @map("start_time")
+  endTime      String   @map("end_time")
+
+  status       String   @default("pending")
+  type         String   @default("consultation")
+
+  symptoms     String?  @db.Text
+  notes        String?  @db.Text
+  diagnosis    String?  @db.Text
+
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("appointments")
+}
+
+// ==================== PRESCRIPTION ====================
+
+model Prescription {
+  id           Int      @id @default(autoincrement())
+
+  patientId    Int      @map("patient_id")
+  patient      Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  doctorId     Int      @map("doctor_id")
+  doctor       Doctor   @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+
+  // Prescription Details
+  diagnosis    String
+  medications  Json
+  instructions String?  @db.Text
+
+  validUntil   DateTime? @map("valid_until")
+
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("prescriptions")
+}
+
+// ==================== MEDICAL RECORD ====================
+
+model MedicalRecord {
+  id           Int      @id @default(autoincrement())
+
+  patientId    Int      @map("patient_id")
+  patient      Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  doctorId     Int      @map("doctor_id")
+  doctor       Doctor   @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+
+  // Record Details
+  type         String
+  title        String
+  description  String?  @db.Text
+  attachments  Json?
+
+  recordDate   DateTime @map("record_date")
+
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("medical_records")
+}
