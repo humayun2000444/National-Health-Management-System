@@ -20,7 +20,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Avatar } from "@/components/ui/Avatar";
 
 interface NavItem {
@@ -57,10 +57,37 @@ const patientNavItems: NavItem[] = [
   { name: "Profile", href: "/patient/profile", icon: <UserCog className="h-5 w-5" /> },
 ];
 
+interface HospitalInfo {
+  id: string;
+  name: string;
+  slug: string;
+  logo: string | null;
+  primaryColor: string;
+}
+
 export function Sidebar() {
   const pathname = usePathname();
   const { data: session } = useSession();
   const [collapsed, setCollapsed] = useState(false);
+  const [hospitalInfo, setHospitalInfo] = useState<HospitalInfo | null>(null);
+
+  useEffect(() => {
+    const fetchHospitalInfo = async () => {
+      try {
+        const response = await fetch("/api/hospital/info");
+        if (response.ok) {
+          const data = await response.json();
+          setHospitalInfo(data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch hospital info:", error);
+      }
+    };
+
+    if (session?.user) {
+      fetchHospitalInfo();
+    }
+  }, [session]);
 
   const userType = session?.user?.type;
   const navItems =
@@ -83,13 +110,31 @@ export function Sidebar() {
       <div className="flex items-center justify-between h-16 px-4 border-b border-slate-800">
         {!collapsed && (
           <div className="flex items-center gap-2">
-            <Heart className="h-8 w-8 text-blue-500" />
-            <span className="text-lg font-bold">
-              {session?.user?.hospitalName || "Hospital"}
+            {hospitalInfo?.logo ? (
+              <img
+                src={hospitalInfo.logo}
+                alt={hospitalInfo.name}
+                className="h-8 w-8 rounded-lg object-cover"
+              />
+            ) : (
+              <Heart className="h-8 w-8 text-blue-500" />
+            )}
+            <span className="text-lg font-bold truncate">
+              {hospitalInfo?.name || session?.user?.hospitalName || "Hospital"}
             </span>
           </div>
         )}
-        {collapsed && <Heart className="h-8 w-8 text-blue-500 mx-auto" />}
+        {collapsed && (
+          hospitalInfo?.logo ? (
+            <img
+              src={hospitalInfo.logo}
+              alt={hospitalInfo?.name || "Hospital"}
+              className="h-8 w-8 rounded-lg object-cover mx-auto"
+            />
+          ) : (
+            <Heart className="h-8 w-8 text-blue-500 mx-auto" />
+          )
+        )}
         <button
           onClick={() => setCollapsed(!collapsed)}
           className={cn(

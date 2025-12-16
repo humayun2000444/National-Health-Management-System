@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { useSession } from "next-auth/react";
+import { useState, useEffect, useRef } from "react";
 import { Header } from "@/components/dashboard/Header";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -15,7 +14,36 @@ import {
   Save,
   Upload,
   Check,
+  Loader2,
+  RefreshCw,
+  CheckCircle,
+  AlertCircle,
+  Trash2,
 } from "lucide-react";
+
+interface HospitalSettings {
+  id: string;
+  name: string;
+  slug: string;
+  logo: string | null;
+  email: string;
+  phone: string | null;
+  address: string | null;
+  website: string | null;
+  primaryColor: string;
+  secondaryColor: string;
+  accentColor: string;
+  subscription: string;
+  settings: {
+    onlineBooking: boolean;
+    prescriptions: boolean;
+    medicalRecords: boolean;
+    smsNotifications: boolean;
+    emailNotifications: boolean;
+    appointmentReminder: number;
+    replyToEmail: string;
+  };
+}
 
 const colorPresets = [
   { name: "Blue", primary: "#2563eb", secondary: "#1e40af" },
@@ -27,18 +55,18 @@ const colorPresets = [
 ];
 
 export default function SettingsPage() {
-  const { data: session } = useSession();
   const [activeTab, setActiveTab] = useState("general");
+  const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   // Form states
-  const [hospitalName, setHospitalName] = useState(
-    session?.user?.hospitalName || "City Hospital"
-  );
-  const [email, setEmail] = useState("admin@hospital.com");
-  const [phone, setPhone] = useState("+1 234 567 8900");
-  const [address, setAddress] = useState("123 Medical Center Drive, City, State 12345");
-  const [website, setWebsite] = useState("https://hospital.com");
+  const [hospitalName, setHospitalName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
+  const [website, setWebsite] = useState("");
 
   // Branding
   const [primaryColor, setPrimaryColor] = useState("#2563eb");
@@ -54,11 +82,180 @@ export default function SettingsPage() {
     emailNotifications: true,
   });
 
-  const handleSave = async () => {
+  // Notification settings
+  const [appointmentReminder, setAppointmentReminder] = useState(24);
+  const [replyToEmail, setReplyToEmail] = useState("");
+
+  // Subscription
+  const [subscription, setSubscription] = useState("free");
+
+  // Logo
+  const [logo, setLogo] = useState<string | null>(null);
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    fetchSettings();
+  }, []);
+
+  const fetchSettings = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const response = await fetch("/api/admin/settings");
+      if (!response.ok) throw new Error("Failed to fetch settings");
+      const data: HospitalSettings = await response.json();
+
+      setHospitalName(data.name);
+      setEmail(data.email);
+      setPhone(data.phone || "");
+      setAddress(data.address || "");
+      setWebsite(data.website || "");
+      setPrimaryColor(data.primaryColor);
+      setSecondaryColor(data.secondaryColor);
+      setAccentColor(data.accentColor);
+      setSubscription(data.subscription);
+      setLogo(data.logo);
+
+      if (data.settings) {
+        setFeatures({
+          onlineBooking: data.settings.onlineBooking ?? true,
+          prescriptions: data.settings.prescriptions ?? true,
+          medicalRecords: data.settings.medicalRecords ?? true,
+          smsNotifications: data.settings.smsNotifications ?? false,
+          emailNotifications: data.settings.emailNotifications ?? true,
+        });
+        setAppointmentReminder(data.settings.appointmentReminder ?? 24);
+        setReplyToEmail(data.settings.replyToEmail ?? "");
+      }
+    } catch (err) {
+      setError("Failed to load settings");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploadingLogo(true);
+    setError("");
+
+    try {
+      const formData = new FormData();
+      formData.append("logo", file);
+
+      const response = await fetch("/api/admin/settings/upload-logo", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Failed to upload logo");
+      }
+
+      const data = await response.json();
+      setLogo(data.logo);
+      setSuccess("Logo uploaded successfully!");
+      setTimeout(() => setSuccess(""), 3000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to upload logo");
+    } finally {
+      setIsUploadingLogo(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+
+  const handleRemoveLogo = async () => {
+    if (!confirm("Are you sure you want to remove the logo?")) return;
+
+    setIsUploadingLogo(true);
+    setError("");
+
+    try {
+      const response = await fetch("/api/admin/settings/upload-logo", {
+        method: "DELETE",
+      });
+
+      if (!response.ok) throw new Error("Failed to remove logo");
+
+      setLogo(null);
+      setSuccess("Logo removed successfully!");
+      setTimeout(() => setSuccess(""), 3000);
+    } catch (err) {
+      setError("Failed to remove logo");
+      console.error(err);
+    } finally {
+      setIsUploadingLogo(false);
+    }
+  };
+
+  const handleSave = async (section: string) => {
     setIsSaving(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    setIsSaving(false);
+    setError("");
+    setSuccess("");
+
+    try {
+      let updateData: Record<string, unknown> = {};
+
+      switch (section) {
+        case "general":
+          updateData = {
+            name: hospitalName,
+            email,
+            phone,
+            address,
+            website,
+          };
+          break;
+        case "branding":
+          updateData = {
+            primaryColor,
+            secondaryColor,
+            accentColor,
+          };
+          break;
+        case "features":
+          updateData = {
+            settings: {
+              ...features,
+              appointmentReminder,
+              replyToEmail,
+            },
+          };
+          break;
+        case "notifications":
+          updateData = {
+            settings: {
+              ...features,
+              appointmentReminder,
+              replyToEmail,
+            },
+          };
+          break;
+      }
+
+      const response = await fetch("/api/admin/settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updateData),
+      });
+
+      if (!response.ok) throw new Error("Failed to save settings");
+
+      setSuccess("Settings saved successfully!");
+      setTimeout(() => setSuccess(""), 3000);
+    } catch (err) {
+      setError("Failed to save settings");
+      console.error(err);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const tabs = [
@@ -68,6 +265,17 @@ export default function SettingsPage() {
     { id: "notifications", label: "Notifications", icon: <Bell className="h-4 w-4" /> },
   ];
 
+  if (loading) {
+    return (
+      <div className="min-h-screen">
+        <Header title="Settings" subtitle="Customize your hospital settings and branding" />
+        <div className="flex items-center justify-center h-96">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen">
       <Header
@@ -76,6 +284,24 @@ export default function SettingsPage() {
       />
 
       <div className="p-6">
+        {/* Success/Error Messages */}
+        {success && (
+          <div className="mb-4 p-4 rounded-lg bg-emerald-50 border border-emerald-200 flex items-center gap-2 text-emerald-700">
+            <CheckCircle className="h-5 w-5" />
+            {success}
+          </div>
+        )}
+        {error && (
+          <div className="mb-4 p-4 rounded-lg bg-red-50 border border-red-200 flex items-center gap-2 text-red-700">
+            <AlertCircle className="h-5 w-5" />
+            {error}
+            <Button variant="ghost" size="sm" onClick={fetchSettings} className="ml-auto">
+              <RefreshCw className="h-4 w-4 mr-1" />
+              Retry
+            </Button>
+          </div>
+        )}
+
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Sidebar */}
           <div className="w-full lg:w-64">
@@ -99,6 +325,21 @@ export default function SettingsPage() {
                 </nav>
               </CardContent>
             </Card>
+
+            {/* Subscription Info */}
+            <Card className="mt-4">
+              <CardContent className="p-4">
+                <p className="text-sm font-medium text-slate-700 mb-2">Current Plan</p>
+                <Badge variant={subscription === "premium" ? "success" : "secondary"}>
+                  {subscription.charAt(0).toUpperCase() + subscription.slice(1)}
+                </Badge>
+                {subscription === "free" && (
+                  <p className="text-xs text-slate-500 mt-2">
+                    Upgrade to Premium for SMS notifications and more features.
+                  </p>
+                )}
+              </CardContent>
+            </Card>
           </div>
 
           {/* Main Content */}
@@ -117,16 +358,54 @@ export default function SettingsPage() {
                         Hospital Logo
                       </label>
                       <div className="flex items-center gap-4">
-                        <div className="w-24 h-24 bg-slate-100 rounded-xl flex items-center justify-center border-2 border-dashed border-slate-300">
-                          <Building2 className="h-8 w-8 text-slate-400" />
+                        <div className="w-24 h-24 bg-slate-100 rounded-xl flex items-center justify-center border-2 border-dashed border-slate-300 overflow-hidden">
+                          {logo ? (
+                            <img
+                              src={logo}
+                              alt="Hospital Logo"
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <Building2 className="h-8 w-8 text-slate-400" />
+                          )}
                         </div>
-                        <div>
-                          <Button variant="outline" size="sm">
-                            <Upload className="h-4 w-4 mr-2" />
-                            Upload Logo
-                          </Button>
-                          <p className="text-xs text-slate-500 mt-1">
-                            PNG, JPG up to 2MB. Recommended: 512x512px
+                        <div className="space-y-2">
+                          <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/png,image/jpeg,image/gif,image/webp"
+                            onChange={handleLogoUpload}
+                            className="hidden"
+                            id="logo-upload"
+                          />
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => fileInputRef.current?.click()}
+                              disabled={isUploadingLogo}
+                            >
+                              {isUploadingLogo ? (
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                              ) : (
+                                <Upload className="h-4 w-4 mr-2" />
+                              )}
+                              {logo ? "Change Logo" : "Upload Logo"}
+                            </Button>
+                            {logo && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={handleRemoveLogo}
+                                disabled={isUploadingLogo}
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            )}
+                          </div>
+                          <p className="text-xs text-slate-500">
+                            PNG, JPG, GIF, WebP up to 2MB. Recommended: 512x512px
                           </p>
                         </div>
                       </div>
@@ -166,7 +445,7 @@ export default function SettingsPage() {
                     />
 
                     <div className="flex justify-end">
-                      <Button onClick={handleSave} isLoading={isSaving}>
+                      <Button onClick={() => handleSave("general")} isLoading={isSaving}>
                         <Save className="h-4 w-4 mr-2" />
                         Save Changes
                       </Button>
@@ -286,7 +565,7 @@ export default function SettingsPage() {
                         style={{ backgroundColor: primaryColor }}
                       >
                         <h3 className="text-xl font-bold text-white mb-2">
-                          {hospitalName}
+                          {hospitalName || "Your Hospital"}
                         </h3>
                         <p className="text-white/80 mb-4">
                           Your hospital branding preview
@@ -304,7 +583,7 @@ export default function SettingsPage() {
                     </div>
 
                     <div className="flex justify-end">
-                      <Button onClick={handleSave} isLoading={isSaving}>
+                      <Button onClick={() => handleSave("branding")} isLoading={isSaving}>
                         <Save className="h-4 w-4 mr-2" />
                         Save Changes
                       </Button>
@@ -346,7 +625,8 @@ export default function SettingsPage() {
                         label: "SMS Notifications",
                         description:
                           "Send SMS reminders for appointments",
-                        badge: "Premium",
+                        badge: subscription === "free" ? "Premium" : undefined,
+                        disabled: subscription === "free",
                       },
                       {
                         key: "emailNotifications",
@@ -357,11 +637,15 @@ export default function SettingsPage() {
                     ].map((feature) => (
                       <div
                         key={feature.key}
-                        className="flex items-center justify-between p-4 rounded-lg bg-slate-50"
+                        className={`flex items-center justify-between p-4 rounded-lg ${
+                          feature.disabled ? "bg-slate-100" : "bg-slate-50"
+                        }`}
                       >
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
-                            <p className="font-medium text-slate-900">
+                            <p className={`font-medium ${
+                              feature.disabled ? "text-slate-500" : "text-slate-900"
+                            }`}>
                               {feature.label}
                             </p>
                             {feature.badge && (
@@ -386,15 +670,18 @@ export default function SettingsPage() {
                                 [feature.key]: e.target.checked,
                               })
                             }
+                            disabled={feature.disabled}
                             className="sr-only peer"
                           />
-                          <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                          <div className={`w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600 ${
+                            feature.disabled ? "opacity-50 cursor-not-allowed" : ""
+                          }`}></div>
                         </label>
                       </div>
                     ))}
 
                     <div className="flex justify-end pt-4">
-                      <Button onClick={handleSave} isLoading={isSaving}>
+                      <Button onClick={() => handleSave("features")} isLoading={isSaving}>
                         <Save className="h-4 w-4 mr-2" />
                         Save Changes
                       </Button>
@@ -417,31 +704,36 @@ export default function SettingsPage() {
                       and staff.
                     </p>
 
-                    <div className="p-4 rounded-lg bg-amber-50 border border-amber-200">
-                      <p className="text-sm text-amber-800">
-                        <strong>Note:</strong> SMS notifications require a
-                        premium subscription. Upgrade your plan to enable this
-                        feature.
-                      </p>
-                    </div>
+                    {subscription === "free" && (
+                      <div className="p-4 rounded-lg bg-amber-50 border border-amber-200">
+                        <p className="text-sm text-amber-800">
+                          <strong>Note:</strong> SMS notifications require a
+                          premium subscription. Upgrade your plan to enable this
+                          feature.
+                        </p>
+                      </div>
+                    )}
 
                     <div className="space-y-4 pt-4">
                       <Input
                         label="Appointment Reminder (hours before)"
                         type="number"
-                        defaultValue="24"
+                        value={appointmentReminder}
+                        onChange={(e) => setAppointmentReminder(parseInt(e.target.value) || 24)}
                         hint="Send reminder notification this many hours before appointment"
                       />
                       <Input
                         label="Reply-to Email"
                         type="email"
-                        defaultValue="noreply@hospital.com"
+                        value={replyToEmail}
+                        onChange={(e) => setReplyToEmail(e.target.value)}
+                        placeholder="noreply@hospital.com"
                         hint="Email address used for notification replies"
                       />
                     </div>
 
                     <div className="flex justify-end pt-4">
-                      <Button onClick={handleSave} isLoading={isSaving}>
+                      <Button onClick={() => handleSave("notifications")} isLoading={isSaving}>
                         <Save className="h-4 w-4 mr-2" />
                         Save Changes
                       </Button>

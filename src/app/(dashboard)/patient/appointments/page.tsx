@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Header } from "@/components/dashboard/Header";
 import { Card, CardContent } from "@/components/ui/Card";
@@ -17,50 +17,32 @@ import {
   Video,
   MapPin,
   FileText,
+  Loader2,
+  RefreshCw,
 } from "lucide-react";
 
-const appointmentsData = [
-  {
-    id: 1,
-    doctor: "Dr. Sarah Wilson",
-    specialization: "Cardiology",
-    date: "2024-01-25",
-    time: "10:00 AM",
-    type: "Consultation",
-    status: "confirmed",
-    location: "Room 205, Building A",
-  },
-  {
-    id: 2,
-    doctor: "Dr. Michael Chen",
-    specialization: "Neurology",
-    date: "2024-02-05",
-    time: "02:30 PM",
-    type: "Follow-up",
-    status: "pending",
-    location: "Room 301, Building B",
-  },
-  {
-    id: 3,
-    doctor: "Dr. Sarah Wilson",
-    specialization: "Cardiology",
-    date: "2024-01-10",
-    time: "11:00 AM",
-    type: "Consultation",
-    status: "completed",
-    location: "Room 205, Building A",
-  },
-  {
-    id: 4,
-    doctor: "Dr. James Brown",
-    specialization: "Orthopedics",
-    date: "2024-01-05",
-    time: "09:30 AM",
-    type: "Follow-up",
-    status: "completed",
-    location: "Room 102, Building A",
-  },
-];
+interface Appointment {
+  id: number;
+  doctor: string;
+  specialization: string;
+  avatar: string | null;
+  department: string;
+  date: string;
+  time: string;
+  endTime: string;
+  type: string;
+  status: string;
+  location: string;
+  symptoms: string | null;
+  notes: string | null;
+}
+
+interface AppointmentCounts {
+  upcoming: number;
+  completed: number;
+  cancelled: number;
+  total: number;
+}
 
 const filterOptions = [
   { value: "all", label: "All Appointments" },
@@ -70,29 +52,124 @@ const filterOptions = [
 ];
 
 export default function PatientAppointmentsPage() {
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [counts, setCounts] = useState<AppointmentCounts>({
+    upcoming: 0,
+    completed: 0,
+    cancelled: 0,
+    total: 0,
+  });
   const [filter, setFilter] = useState("all");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [cancelModalOpen, setCancelModalOpen] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState<number | null>(
     null
   );
+  const [cancelling, setCancelling] = useState(false);
 
-  const filteredAppointments = appointmentsData.filter((apt) => {
+  useEffect(() => {
+    fetchAppointments();
+  }, []);
+
+  const fetchAppointments = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const response = await fetch("/api/patient/appointments");
+      if (!response.ok) throw new Error("Failed to fetch appointments");
+      const data = await response.json();
+      setAppointments(data.appointments);
+      setCounts(data.counts);
+    } catch (err) {
+      setError("Failed to load appointments");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCancelAppointment = async () => {
+    if (!selectedAppointment) return;
+
+    setCancelling(true);
+    try {
+      const response = await fetch("/api/patient/appointments", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          appointmentId: selectedAppointment,
+          action: "cancel",
+        }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Failed to cancel appointment");
+      }
+
+      // Refresh appointments list
+      await fetchAppointments();
+      setCancelModalOpen(false);
+      setSelectedAppointment(null);
+    } catch (err) {
+      console.error(err);
+      alert(err instanceof Error ? err.message : "Failed to cancel appointment");
+    } finally {
+      setCancelling(false);
+    }
+  };
+
+  // Filter appointments locally
+  const filteredAppointments = appointments.filter((apt) => {
     if (filter === "all") return true;
-    if (filter === "upcoming")
-      return apt.status === "confirmed" || apt.status === "pending";
+    if (filter === "upcoming") {
+      return (
+        (apt.status === "confirmed" || apt.status === "pending") &&
+        new Date(apt.date) >= new Date(new Date().toDateString())
+      );
+    }
     return apt.status === filter;
   });
 
-  const upcomingCount = appointmentsData.filter(
-    (a) => a.status === "confirmed" || a.status === "pending"
-  ).length;
-  const completedCount = appointmentsData.filter(
-    (a) => a.status === "completed"
-  ).length;
+  if (loading) {
+    return (
+      <div className="min-h-screen">
+        <Header
+          title="My Appointments"
+          subtitle="View and manage your appointments"
+        />
+        <div className="flex items-center justify-center h-96">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen">
+        <Header
+          title="My Appointments"
+          subtitle="View and manage your appointments"
+        />
+        <div className="flex flex-col items-center justify-center h-96 gap-4">
+          <p className="text-red-600">{error}</p>
+          <Button onClick={fetchAppointments}>
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Retry
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen">
-      <Header title="My Appointments" subtitle="View and manage your appointments" />
+      <Header
+        title="My Appointments"
+        subtitle="View and manage your appointments"
+      />
 
       <div className="p-6">
         {/* Stats & Actions */}
@@ -100,12 +177,17 @@ export default function PatientAppointmentsPage() {
           <div className="flex gap-4">
             <div className="px-4 py-2 bg-blue-50 rounded-lg">
               <span className="text-sm text-blue-600">
-                <strong className="text-lg">{upcomingCount}</strong> Upcoming
+                <strong className="text-lg">{counts.upcoming}</strong> Upcoming
               </span>
             </div>
             <div className="px-4 py-2 bg-emerald-50 rounded-lg">
               <span className="text-sm text-emerald-600">
-                <strong className="text-lg">{completedCount}</strong> Completed
+                <strong className="text-lg">{counts.completed}</strong> Completed
+              </span>
+            </div>
+            <div className="px-4 py-2 bg-red-50 rounded-lg">
+              <span className="text-sm text-red-600">
+                <strong className="text-lg">{counts.cancelled}</strong> Cancelled
               </span>
             </div>
           </div>
@@ -132,7 +214,11 @@ export default function PatientAppointmentsPage() {
                 <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                   {/* Doctor Info */}
                   <div className="flex items-center gap-4">
-                    <Avatar fallback={apt.doctor} size="lg" />
+                    <Avatar
+                      src={apt.avatar || undefined}
+                      fallback={apt.doctor}
+                      size="lg"
+                    />
                     <div>
                       <h3 className="font-semibold text-slate-900">
                         {apt.doctor}
@@ -142,10 +228,10 @@ export default function PatientAppointmentsPage() {
                       </p>
                       <Badge
                         variant={
-                          apt.type === "Consultation" ? "secondary" : "info"
+                          apt.type === "consultation" ? "secondary" : "info"
                         }
                         size="sm"
-                        className="mt-1"
+                        className="mt-1 capitalize"
                       >
                         {apt.type}
                       </Badge>
@@ -186,6 +272,7 @@ export default function PatientAppointmentsPage() {
                           ? "info"
                           : "danger"
                       }
+                      className="capitalize"
                     >
                       {apt.status}
                     </Badge>
@@ -212,10 +299,12 @@ export default function PatientAppointmentsPage() {
                     )}
 
                     {apt.status === "completed" && (
-                      <Button variant="outline" size="sm">
-                        <FileText className="h-4 w-4 mr-1" />
-                        View Report
-                      </Button>
+                      <Link href={`/patient/records?appointmentId=${apt.id}`}>
+                        <Button variant="outline" size="sm">
+                          <FileText className="h-4 w-4 mr-1" />
+                          View Report
+                        </Button>
+                      </Link>
                     )}
                   </div>
                 </div>
@@ -238,7 +327,12 @@ export default function PatientAppointmentsPage() {
       {/* Cancel Modal */}
       <Modal
         isOpen={cancelModalOpen}
-        onClose={() => setCancelModalOpen(false)}
+        onClose={() => {
+          if (!cancelling) {
+            setCancelModalOpen(false);
+            setSelectedAppointment(null);
+          }
+        }}
         title="Cancel Appointment"
       >
         <p className="text-slate-600">
@@ -246,17 +340,29 @@ export default function PatientAppointmentsPage() {
           be undone.
         </p>
         <ModalFooter>
-          <Button variant="outline" onClick={() => setCancelModalOpen(false)}>
+          <Button
+            variant="outline"
+            onClick={() => {
+              setCancelModalOpen(false);
+              setSelectedAppointment(null);
+            }}
+            disabled={cancelling}
+          >
             Keep Appointment
           </Button>
           <Button
             variant="danger"
-            onClick={() => {
-              // Handle cancellation
-              setCancelModalOpen(false);
-            }}
+            onClick={handleCancelAppointment}
+            disabled={cancelling}
           >
-            Cancel Appointment
+            {cancelling ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Cancelling...
+              </>
+            ) : (
+              "Cancel Appointment"
+            )}
           </Button>
         </ModalFooter>
       </Modal>

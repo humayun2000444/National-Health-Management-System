@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { Header } from "@/components/dashboard/Header";
 import { StatsCard } from "@/components/dashboard/StatsCard";
@@ -19,87 +20,166 @@ import {
   DollarSign,
   TrendingUp,
   Clock,
+  Loader2,
+  RefreshCw,
 } from "lucide-react";
 
-// Sample data for charts
-const appointmentData = [
-  { name: "Mon", appointments: 24 },
-  { name: "Tue", appointments: 18 },
-  { name: "Wed", appointments: 32 },
-  { name: "Thu", appointments: 27 },
-  { name: "Fri", appointments: 21 },
-  { name: "Sat", appointments: 15 },
-  { name: "Sun", appointments: 8 },
-];
+interface Stats {
+  totalPatients: number;
+  totalDoctors: number;
+  todayAppointments: number;
+  monthlyRevenue: number;
+  pendingAppointments: number;
+  completedAppointments: number;
+  departments: number;
+  totalAppointments: number;
+}
 
-const revenueData = [
-  { name: "Jan", revenue: 4500 },
-  { name: "Feb", revenue: 5200 },
-  { name: "Mar", revenue: 4800 },
-  { name: "Apr", revenue: 6100 },
-  { name: "May", revenue: 5800 },
-  { name: "Jun", revenue: 7200 },
-];
+interface Appointment {
+  id: string;
+  date: string;
+  time: string;
+  type: string;
+  status: string;
+  patient: {
+    name: string;
+  };
+  doctor: {
+    name: string;
+    department: {
+      name: string;
+    } | null;
+  };
+}
 
-const departmentData = [
-  { name: "Cardiology", value: 35, color: "#2563eb" },
-  { name: "Neurology", value: 25, color: "#10b981" },
-  { name: "Orthopedics", value: 20, color: "#f59e0b" },
-  { name: "Pediatrics", value: 20, color: "#8b5cf6" },
-];
+interface Doctor {
+  id: string;
+  name: string;
+  specialization: string;
+  department: string;
+  appointments: number;
+  image: string | null;
+}
 
-const recentAppointments = [
-  {
-    id: 1,
-    patient: "John Smith",
-    doctor: "Dr. Sarah Wilson",
-    time: "09:00 AM",
-    status: "confirmed",
-  },
-  {
-    id: 2,
-    patient: "Emily Davis",
-    doctor: "Dr. Michael Chen",
-    time: "10:30 AM",
-    status: "pending",
-  },
-  {
-    id: 3,
-    patient: "Robert Johnson",
-    doctor: "Dr. Sarah Wilson",
-    time: "11:00 AM",
-    status: "confirmed",
-  },
-  {
-    id: 4,
-    patient: "Lisa Anderson",
-    doctor: "Dr. James Brown",
-    time: "02:00 PM",
-    status: "cancelled",
-  },
-  {
-    id: 5,
-    patient: "David Miller",
-    doctor: "Dr. Michael Chen",
-    time: "03:30 PM",
-    status: "confirmed",
-  },
-];
+interface WeeklyData {
+  day: string;
+  appointments: number;
+}
 
-const topDoctors = [
-  { id: 1, name: "Dr. Sarah Wilson", specialty: "Cardiology", patients: 48, rating: 4.9 },
-  { id: 2, name: "Dr. Michael Chen", specialty: "Neurology", patients: 42, rating: 4.8 },
-  { id: 3, name: "Dr. James Brown", specialty: "Orthopedics", patients: 38, rating: 4.7 },
-];
+interface DepartmentStats {
+  name: string;
+  appointments: number;
+}
 
 export default function AdminDashboard() {
   const { data: session } = useSession();
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [recentAppointments, setRecentAppointments] = useState<Appointment[]>([]);
+  const [topDoctors, setTopDoctors] = useState<Doctor[]>([]);
+  const [weeklyData, setWeeklyData] = useState<WeeklyData[]>([]);
+  const [departmentStats, setDepartmentStats] = useState<DepartmentStats[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const fetchDashboardData = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const response = await fetch("/api/admin/stats");
+      if (!response.ok) throw new Error("Failed to fetch data");
+      const data = await response.json();
+
+      setStats(data.stats);
+      setRecentAppointments(data.recentAppointments || []);
+      setTopDoctors(data.topDoctors || []);
+      setWeeklyData(data.weeklyData || []);
+      setDepartmentStats(data.departmentStats || []);
+    } catch (err) {
+      setError("Failed to load dashboard data");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "confirmed":
+        return <Badge variant="success">Confirmed</Badge>;
+      case "pending":
+        return <Badge variant="warning">Pending</Badge>;
+      case "completed":
+        return <Badge variant="default">Completed</Badge>;
+      case "cancelled":
+        return <Badge variant="danger">Cancelled</Badge>;
+      default:
+        return <Badge>{status}</Badge>;
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen">
+        <Header
+          title="Dashboard"
+          subtitle="Loading..."
+        />
+        <div className="flex items-center justify-center h-96">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen">
+        <Header
+          title="Dashboard"
+          subtitle="Error loading data"
+        />
+        <div className="flex flex-col items-center justify-center h-96 gap-4">
+          <p className="text-red-600">{error}</p>
+          <button
+            onClick={fetchDashboardData}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            <RefreshCw className="h-4 w-4" />
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Prepare chart data
+  const barChartData = weeklyData.map((d) => ({
+    name: d.day,
+    appointments: d.appointments,
+  }));
+
+  const revenueData = weeklyData.map((d, i) => ({
+    name: d.day,
+    revenue: Math.round((stats?.monthlyRevenue || 0) / 30 * (i + 1)),
+  }));
+
+  const pieChartData = departmentStats
+    .filter((d) => d.appointments > 0)
+    .map((d, i) => ({
+      name: d.name,
+      value: d.appointments,
+      color: ["#2563eb", "#10b981", "#f59e0b", "#8b5cf6", "#ef4444", "#06b6d4"][i % 6],
+    }));
 
   return (
     <div className="min-h-screen">
       <Header
         title="Dashboard"
-        subtitle={`Welcome back, ${session?.user?.name}`}
+        subtitle={`Welcome back, ${session?.user?.name || "Admin"}`}
       />
 
       <div className="p-6">
@@ -107,7 +187,7 @@ export default function AdminDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
           <StatsCard
             title="Total Patients"
-            value="2,847"
+            value={stats?.totalPatients?.toLocaleString() || "0"}
             icon={<Users className="h-6 w-6" />}
             trend={{ value: 12.5, isPositive: true }}
             iconColor="text-blue-600"
@@ -115,7 +195,7 @@ export default function AdminDashboard() {
           />
           <StatsCard
             title="Total Doctors"
-            value="48"
+            value={stats?.totalDoctors?.toString() || "0"}
             icon={<Stethoscope className="h-6 w-6" />}
             trend={{ value: 4.2, isPositive: true }}
             iconColor="text-emerald-600"
@@ -123,7 +203,7 @@ export default function AdminDashboard() {
           />
           <StatsCard
             title="Appointments Today"
-            value="145"
+            value={stats?.todayAppointments?.toString() || "0"}
             icon={<Calendar className="h-6 w-6" />}
             trend={{ value: 8.1, isPositive: true }}
             iconColor="text-amber-600"
@@ -131,7 +211,7 @@ export default function AdminDashboard() {
           />
           <StatsCard
             title="Revenue (Monthly)"
-            value="$72,450"
+            value={`$${(stats?.monthlyRevenue || 0).toLocaleString()}`}
             icon={<DollarSign className="h-6 w-6" />}
             trend={{ value: 15.3, isPositive: true }}
             iconColor="text-violet-600"
@@ -142,20 +222,32 @@ export default function AdminDashboard() {
         {/* Charts Row */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
           <ChartCard title="Weekly Appointments">
-            <SimpleBarChart
-              data={appointmentData}
-              dataKey="appointments"
-              color="#2563eb"
-              height={280}
-            />
+            {barChartData.length > 0 ? (
+              <SimpleBarChart
+                data={barChartData}
+                dataKey="appointments"
+                color="#2563eb"
+                height={280}
+              />
+            ) : (
+              <div className="flex items-center justify-center h-64 text-slate-500">
+                No appointment data available
+              </div>
+            )}
           </ChartCard>
           <ChartCard title="Revenue Overview">
-            <SimpleAreaChart
-              data={revenueData}
-              dataKey="revenue"
-              color="#10b981"
-              height={280}
-            />
+            {revenueData.length > 0 ? (
+              <SimpleAreaChart
+                data={revenueData}
+                dataKey="revenue"
+                color="#10b981"
+                height={280}
+              />
+            ) : (
+              <div className="flex items-center justify-center h-64 text-slate-500">
+                No revenue data available
+              </div>
+            )}
           </ChartCard>
         </div>
 
@@ -163,45 +255,51 @@ export default function AdminDashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Recent Appointments */}
           <Card className="lg:col-span-2">
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Recent Appointments</CardTitle>
+              <a
+                href="/admin/appointments"
+                className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+              >
+                View All
+              </a>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {recentAppointments.map((apt) => (
-                  <div
-                    key={apt.id}
-                    className="flex items-center justify-between p-4 rounded-lg bg-slate-50"
-                  >
-                    <div className="flex items-center gap-4">
-                      <Avatar fallback={apt.patient} size="md" />
-                      <div>
-                        <p className="font-medium text-slate-900">
-                          {apt.patient}
-                        </p>
-                        <p className="text-sm text-slate-500">{apt.doctor}</p>
+              {recentAppointments.length > 0 ? (
+                <div className="space-y-4">
+                  {recentAppointments.map((apt) => (
+                    <div
+                      key={apt.id}
+                      className="flex items-center justify-between p-4 rounded-lg bg-slate-50"
+                    >
+                      <div className="flex items-center gap-4">
+                        <Avatar fallback={apt.patient?.name || "P"} size="md" />
+                        <div>
+                          <p className="font-medium text-slate-900">
+                            {apt.patient?.name || "Unknown Patient"}
+                          </p>
+                          <p className="text-sm text-slate-500">
+                            {apt.doctor?.name || "Unknown Doctor"} - {apt.doctor?.department?.name || "General"}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-1 text-slate-500">
+                          <Clock className="h-4 w-4" />
+                          <span className="text-sm">
+                            {new Date(apt.date).toLocaleDateString()} {apt.time}
+                          </span>
+                        </div>
+                        {getStatusBadge(apt.status)}
                       </div>
                     </div>
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-1 text-slate-500">
-                        <Clock className="h-4 w-4" />
-                        <span className="text-sm">{apt.time}</span>
-                      </div>
-                      <Badge
-                        variant={
-                          apt.status === "confirmed"
-                            ? "success"
-                            : apt.status === "pending"
-                            ? "warning"
-                            : "danger"
-                        }
-                      >
-                        {apt.status}
-                      </Badge>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-slate-500">
+                  No recent appointments
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -211,45 +309,60 @@ export default function AdminDashboard() {
               <CardTitle>Appointments by Department</CardTitle>
             </CardHeader>
             <CardContent>
-              <SimplePieChart data={departmentData} height={250} />
+              {pieChartData.length > 0 ? (
+                <SimplePieChart data={pieChartData} height={250} />
+              ) : (
+                <div className="flex items-center justify-center h-64 text-slate-500">
+                  No department data available
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
 
         {/* Top Doctors */}
         <Card className="mt-6">
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Top Performing Doctors</CardTitle>
+            <a
+              href="/admin/doctors"
+              className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+            >
+              View All
+            </a>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {topDoctors.map((doctor, index) => (
-                <div
-                  key={doctor.id}
-                  className="flex items-center gap-4 p-4 rounded-lg bg-slate-50"
-                >
-                  <div className="relative">
-                    <Avatar fallback={doctor.name} size="lg" />
-                    <div className="absolute -top-1 -right-1 w-6 h-6 bg-blue-600 text-white text-xs rounded-full flex items-center justify-center font-bold">
-                      {index + 1}
+            {topDoctors.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                {topDoctors.map((doctor, index) => (
+                  <div
+                    key={doctor.id}
+                    className="flex flex-col items-center gap-2 p-4 rounded-lg bg-slate-50"
+                  >
+                    <div className="relative">
+                      <Avatar fallback={doctor.name} size="lg" />
+                      <div className="absolute -top-1 -right-1 w-6 h-6 bg-blue-600 text-white text-xs rounded-full flex items-center justify-center font-bold">
+                        {index + 1}
+                      </div>
+                    </div>
+                    <div className="text-center">
+                      <p className="font-medium text-slate-900">{doctor.name}</p>
+                      <p className="text-sm text-slate-500">{doctor.specialization}</p>
+                      <div className="flex items-center justify-center gap-1 mt-1">
+                        <TrendingUp className="h-3 w-3 text-emerald-600" />
+                        <span className="text-xs text-emerald-600">
+                          {doctor.appointments} appointments
+                        </span>
+                      </div>
                     </div>
                   </div>
-                  <div className="flex-1">
-                    <p className="font-medium text-slate-900">{doctor.name}</p>
-                    <p className="text-sm text-slate-500">{doctor.specialty}</p>
-                    <div className="flex items-center gap-4 mt-1">
-                      <span className="text-xs text-slate-500">
-                        {doctor.patients} patients
-                      </span>
-                      <span className="flex items-center gap-1 text-xs text-amber-600">
-                        <TrendingUp className="h-3 w-3" />
-                        {doctor.rating}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-slate-500">
+                No doctor data available
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

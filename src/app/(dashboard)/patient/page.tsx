@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { Header } from "@/components/dashboard/Header";
@@ -16,52 +17,103 @@ import {
   Pill,
   Activity,
   AlertCircle,
+  Loader2,
+  RefreshCw,
 } from "lucide-react";
 
-const upcomingAppointments = [
-  {
-    id: 1,
-    doctor: "Dr. Sarah Wilson",
-    specialization: "Cardiology",
-    date: "2024-01-25",
-    time: "10:00 AM",
-    status: "confirmed",
-  },
-  {
-    id: 2,
-    doctor: "Dr. Michael Chen",
-    specialization: "Neurology",
-    date: "2024-02-05",
-    time: "02:30 PM",
-    status: "pending",
-  },
-];
-
-const recentPrescriptions = [
-  {
-    id: 1,
-    doctor: "Dr. Sarah Wilson",
-    date: "2024-01-20",
-    medications: ["Lisinopril 10mg", "Aspirin 81mg"],
-    status: "active",
-  },
-  {
-    id: 2,
-    doctor: "Dr. Michael Chen",
-    date: "2024-01-15",
-    medications: ["Metformin 500mg"],
-    status: "active",
-  },
-];
-
-const healthMetrics = [
-  { label: "Blood Pressure", value: "120/80", status: "normal" },
-  { label: "Heart Rate", value: "72 bpm", status: "normal" },
-  { label: "Blood Sugar", value: "110 mg/dL", status: "warning" },
-];
+interface DashboardData {
+  stats: {
+    upcomingAppointments: number;
+    nextAppointment: string;
+    activePrescriptions: number;
+    medicalRecords: number;
+    totalVisits: number;
+  };
+  appointments: Array<{
+    id: number;
+    doctor: string;
+    specialization: string;
+    avatar: string | null;
+    department: string;
+    date: string;
+    time: string;
+    status: string;
+    type: string;
+  }>;
+  prescriptions: Array<{
+    id: number;
+    doctor: string;
+    date: string;
+    medications: string[];
+    status: string;
+  }>;
+  patient: {
+    name: string;
+    bloodGroup: string | null;
+    allergies: string | null;
+    chronicConditions: string | null;
+  };
+}
 
 export default function PatientDashboard() {
   const { data: session } = useSession();
+  const [data, setData] = useState<DashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    fetchDashboard();
+  }, []);
+
+  const fetchDashboard = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const response = await fetch("/api/patient/dashboard");
+      if (!response.ok) throw new Error("Failed to fetch dashboard");
+      const dashboardData = await response.json();
+      setData(dashboardData);
+    } catch (err) {
+      setError("Failed to load dashboard data");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen">
+        <Header
+          title="My Dashboard"
+          subtitle={`Welcome back, ${session?.user?.name}`}
+        />
+        <div className="flex items-center justify-center h-96">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !data) {
+    return (
+      <div className="min-h-screen">
+        <Header
+          title="My Dashboard"
+          subtitle={`Welcome back, ${session?.user?.name}`}
+        />
+        <div className="flex flex-col items-center justify-center h-96 gap-4">
+          <p className="text-red-600">{error || "No data available"}</p>
+          <Button onClick={fetchDashboard}>
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Retry
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  const { stats, appointments, prescriptions, patient } = data;
 
   return (
     <div className="min-h-screen">
@@ -75,31 +127,31 @@ export default function PatientDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
           <StatsCard
             title="Upcoming Appointments"
-            value="2"
+            value={stats.upcomingAppointments.toString()}
             icon={<Calendar className="h-6 w-6" />}
-            description="Next: Jan 25"
+            description={`Next: ${stats.nextAppointment}`}
             iconColor="text-blue-600"
             iconBg="bg-blue-100"
           />
           <StatsCard
             title="Active Prescriptions"
-            value="3"
+            value={stats.activePrescriptions.toString()}
             icon={<Pill className="h-6 w-6" />}
-            description="2 refills needed"
+            description="View all prescriptions"
             iconColor="text-emerald-600"
             iconBg="bg-emerald-100"
           />
           <StatsCard
             title="Medical Records"
-            value="12"
+            value={stats.medicalRecords.toString()}
             icon={<FileText className="h-6 w-6" />}
-            description="Last updated: Jan 20"
+            description="View your records"
             iconColor="text-violet-600"
             iconBg="bg-violet-100"
           />
           <StatsCard
             title="Total Visits"
-            value="8"
+            value={stats.totalVisits.toString()}
             icon={<Activity className="h-6 w-6" />}
             description="This year"
             iconColor="text-amber-600"
@@ -147,9 +199,9 @@ export default function PatientDashboard() {
               </Link>
             </CardHeader>
             <CardContent>
-              {upcomingAppointments.length > 0 ? (
+              {appointments.length > 0 ? (
                 <div className="space-y-4">
-                  {upcomingAppointments.map((apt) => (
+                  {appointments.map((apt) => (
                     <div
                       key={apt.id}
                       className="flex items-center justify-between p-4 rounded-lg bg-slate-50"
@@ -203,48 +255,73 @@ export default function PatientDashboard() {
             </CardContent>
           </Card>
 
-          {/* Health Metrics */}
+          {/* Health Info */}
           <Card>
             <CardHeader>
-              <CardTitle>Health Metrics</CardTitle>
+              <CardTitle>Health Profile</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {healthMetrics.map((metric) => (
-                  <div
-                    key={metric.label}
-                    className="flex items-center justify-between p-3 rounded-lg bg-slate-50"
-                  >
+                {patient.bloodGroup && (
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50">
                     <div>
-                      <p className="text-sm text-slate-500">{metric.label}</p>
+                      <p className="text-sm text-slate-500">Blood Group</p>
                       <p className="font-semibold text-slate-900">
-                        {metric.value}
+                        {patient.bloodGroup}
                       </p>
                     </div>
-                    <Badge
-                      variant={
-                        metric.status === "normal" ? "success" : "warning"
-                      }
-                    >
-                      {metric.status}
-                    </Badge>
+                    <Badge variant="primary">{patient.bloodGroup}</Badge>
                   </div>
-                ))}
+                )}
+                {patient.allergies && (
+                  <div className="p-3 rounded-lg bg-red-50 border border-red-100">
+                    <p className="text-sm font-medium text-red-800 mb-1">
+                      Allergies
+                    </p>
+                    <p className="text-sm text-red-700">{patient.allergies}</p>
+                  </div>
+                )}
+                {patient.chronicConditions && (
+                  <div className="p-3 rounded-lg bg-amber-50 border border-amber-100">
+                    <p className="text-sm font-medium text-amber-800 mb-1">
+                      Chronic Conditions
+                    </p>
+                    <p className="text-sm text-amber-700">
+                      {patient.chronicConditions}
+                    </p>
+                  </div>
+                )}
+                {!patient.bloodGroup &&
+                  !patient.allergies &&
+                  !patient.chronicConditions && (
+                    <div className="text-center py-4">
+                      <p className="text-slate-500 text-sm">
+                        No health information on file
+                      </p>
+                      <Link href="/patient/profile">
+                        <Button variant="outline" size="sm" className="mt-2">
+                          Update Profile
+                        </Button>
+                      </Link>
+                    </div>
+                  )}
               </div>
-              <div className="mt-4 p-3 rounded-lg bg-amber-50 border border-amber-200">
-                <div className="flex items-start gap-2">
-                  <AlertCircle className="h-5 w-5 text-amber-600 flex-shrink-0" />
-                  <div>
-                    <p className="text-sm font-medium text-amber-800">
-                      Attention Needed
-                    </p>
-                    <p className="text-xs text-amber-700 mt-1">
-                      Your blood sugar levels are slightly elevated. Consider
-                      scheduling a follow-up.
-                    </p>
+              {(patient.allergies || patient.chronicConditions) && (
+                <div className="mt-4 p-3 rounded-lg bg-blue-50 border border-blue-200">
+                  <div className="flex items-start gap-2">
+                    <AlertCircle className="h-5 w-5 text-blue-600 flex-shrink-0" />
+                    <div>
+                      <p className="text-sm font-medium text-blue-800">
+                        Health Reminder
+                      </p>
+                      <p className="text-xs text-blue-700 mt-1">
+                        Always inform your doctor about your health conditions
+                        before any consultation.
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -261,37 +338,50 @@ export default function PatientDashboard() {
             </Link>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {recentPrescriptions.map((prescription) => (
-                <div
-                  key={prescription.id}
-                  className="p-4 rounded-lg border border-slate-200 hover:border-slate-300 transition-colors"
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <p className="font-medium text-slate-900">
-                      {prescription.doctor}
+            {prescriptions.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {prescriptions.map((prescription) => (
+                  <div
+                    key={prescription.id}
+                    className="p-4 rounded-lg border border-slate-200 hover:border-slate-300 transition-colors"
+                  >
+                    <div className="flex items-center justify-between mb-3">
+                      <p className="font-medium text-slate-900">
+                        {prescription.doctor}
+                      </p>
+                      <Badge
+                        variant={
+                          prescription.status === "active" ? "success" : "secondary"
+                        }
+                      >
+                        {prescription.status}
+                      </Badge>
+                    </div>
+                    <div className="space-y-1">
+                      {prescription.medications.map((med, i) => (
+                        <div key={i} className="flex items-center gap-2">
+                          <Pill className="h-4 w-4 text-slate-400" />
+                          <span className="text-sm text-slate-600">{med}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-xs text-slate-500 mt-3">
+                      Prescribed on{" "}
+                      {new Date(prescription.date).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })}
                     </p>
-                    <Badge variant="success">{prescription.status}</Badge>
                   </div>
-                  <div className="space-y-1">
-                    {prescription.medications.map((med, i) => (
-                      <div key={i} className="flex items-center gap-2">
-                        <Pill className="h-4 w-4 text-slate-400" />
-                        <span className="text-sm text-slate-600">{med}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <p className="text-xs text-slate-500 mt-3">
-                    Prescribed on{" "}
-                    {new Date(prescription.date).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })}
-                  </p>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <Pill className="h-12 w-12 text-slate-300 mx-auto mb-3" />
+                <p className="text-slate-500">No active prescriptions</p>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

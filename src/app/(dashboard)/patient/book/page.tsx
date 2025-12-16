@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Header } from "@/components/dashboard/Header";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -16,78 +17,166 @@ import {
   Star,
   ChevronLeft,
   ChevronRight,
+  Loader2,
+  AlertCircle,
 } from "lucide-react";
 
-const departments = [
-  { value: "", label: "All Departments" },
-  { value: "cardiology", label: "Cardiology" },
-  { value: "neurology", label: "Neurology" },
-  { value: "orthopedics", label: "Orthopedics" },
-  { value: "pediatrics", label: "Pediatrics" },
-  { value: "dermatology", label: "Dermatology" },
-];
+interface Doctor {
+  id: number;
+  name: string;
+  specialization: string;
+  qualification: string | null;
+  experience: number | null;
+  avatar: string | null;
+  consultationFee: number;
+  department: { id: number; name: string } | null;
+  availableDays: string[];
+  availableSlots: string[];
+  rating: number;
+  totalAppointments: number;
+}
 
-const doctors = [
-  {
-    id: 1,
-    name: "Dr. Sarah Wilson",
-    specialization: "Cardiology",
-    experience: 12,
-    rating: 4.9,
-    fee: 150,
-    availableSlots: ["09:00 AM", "10:00 AM", "02:00 PM", "03:00 PM"],
-  },
-  {
-    id: 2,
-    name: "Dr. Michael Chen",
-    specialization: "Neurology",
-    experience: 8,
-    rating: 4.8,
-    fee: 175,
-    availableSlots: ["10:30 AM", "11:30 AM", "04:00 PM"],
-  },
-  {
-    id: 3,
-    name: "Dr. James Brown",
-    specialization: "Orthopedics",
-    experience: 15,
-    rating: 4.7,
-    fee: 125,
-    availableSlots: ["09:00 AM", "11:00 AM", "01:00 PM", "03:30 PM"],
-  },
-];
+interface Department {
+  value: string;
+  label: string;
+}
 
 const appointmentTypes = [
   { value: "consultation", label: "Consultation" },
   { value: "followup", label: "Follow-up" },
-  { value: "emergency", label: "Emergency" },
+  { value: "checkup", label: "General Checkup" },
 ];
 
 export default function BookAppointmentPage() {
+  const router = useRouter();
   const [step, setStep] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  // Data from API
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
+
+  // Selection state
+  const [searchTerm, setSearchTerm] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("");
-  const [selectedDoctor, setSelectedDoctor] = useState<number | null>(null);
+  const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedSlot, setSelectedSlot] = useState("");
   const [appointmentType, setAppointmentType] = useState("consultation");
   const [symptoms, setSymptoms] = useState("");
 
-  const filteredDoctors = doctors.filter(
-    (doc) =>
-      !selectedDepartment ||
-      doc.specialization.toLowerCase() === selectedDepartment
-  );
+  useEffect(() => {
+    fetchDoctors();
+  }, [selectedDepartment]);
 
-  const handleSubmit = () => {
-    // Handle booking submission
-    console.log({
-      doctor: selectedDoctor,
-      date: selectedDate,
-      slot: selectedSlot,
-      type: appointmentType,
-      symptoms,
-    });
+  const fetchDoctors = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const params = new URLSearchParams();
+      if (selectedDepartment) params.append("departmentId", selectedDepartment);
+      if (searchTerm) params.append("search", searchTerm);
+
+      const response = await fetch(`/api/patient/book?${params.toString()}`);
+      if (!response.ok) throw new Error("Failed to fetch doctors");
+
+      const data = await response.json();
+      setDoctors(data.doctors);
+      setDepartments(data.departments);
+    } catch (err) {
+      setError("Failed to load doctors");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const handleSearch = () => {
+    fetchDoctors();
+  };
+
+  const filteredDoctors = doctors.filter((doc) => {
+    if (!searchTerm) return true;
+    return (
+      doc.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      doc.specialization.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  });
+
+  const handleSubmit = async () => {
+    if (!selectedDoctor || !selectedDate || !selectedSlot) {
+      setError("Please complete all required fields");
+      return;
+    }
+
+    setSubmitting(true);
+    setError("");
+
+    try {
+      const response = await fetch("/api/patient/book", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          doctorId: selectedDoctor.id,
+          date: selectedDate,
+          startTime: selectedSlot,
+          type: appointmentType,
+          symptoms,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to book appointment");
+      }
+
+      setSuccess("Appointment booked successfully!");
+      setTimeout(() => {
+        router.push("/patient/appointments");
+      }, 2000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to book appointment");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const getMinDate = () => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    return tomorrow.toISOString().split("T")[0];
+  };
+
+  if (success) {
+    return (
+      <div className="min-h-screen">
+        <Header
+          title="Book Appointment"
+          subtitle="Schedule a visit with our doctors"
+        />
+        <div className="p-6">
+          <Card className="max-w-md mx-auto">
+            <CardContent className="p-8 text-center">
+              <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <CheckCircle className="h-8 w-8 text-emerald-600" />
+              </div>
+              <h2 className="text-xl font-bold text-slate-900 mb-2">
+                Appointment Booked!
+              </h2>
+              <p className="text-slate-600 mb-4">{success}</p>
+              <p className="text-sm text-slate-500">
+                Redirecting to your appointments...
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen">
@@ -97,6 +186,20 @@ export default function BookAppointmentPage() {
       />
 
       <div className="p-6">
+        {/* Error Message */}
+        {error && (
+          <div className="mb-4 p-4 rounded-lg bg-red-50 border border-red-200 flex items-center gap-2 text-red-700">
+            <AlertCircle className="h-5 w-5" />
+            {error}
+            <button
+              onClick={() => setError("")}
+              className="ml-auto text-red-500 hover:text-red-700"
+            >
+              ×
+            </button>
+          </div>
+        )}
+
         {/* Progress Steps */}
         <div className="mb-8">
           <div className="flex items-center justify-center gap-4">
@@ -143,6 +246,9 @@ export default function BookAppointmentPage() {
                 <Input
                   placeholder="Search doctors..."
                   leftIcon={<Search className="h-4 w-4" />}
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                 />
               </div>
               <div className="w-48">
@@ -155,71 +261,85 @@ export default function BookAppointmentPage() {
             </div>
 
             {/* Doctors Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredDoctors.map((doctor) => (
-                <Card
-                  key={doctor.id}
-                  className={`cursor-pointer transition-all ${
-                    selectedDoctor === doctor.id
-                      ? "ring-2 ring-blue-600"
-                      : "hover:shadow-md"
-                  }`}
-                  onClick={() => setSelectedDoctor(doctor.id)}
-                >
-                  <CardContent className="p-6">
-                    <div className="flex items-center gap-4 mb-4">
-                      <Avatar fallback={doctor.name} size="lg" />
-                      <div>
-                        <h3 className="font-semibold text-slate-900">
-                          {doctor.name}
-                        </h3>
-                        <p className="text-sm text-blue-600">
-                          {doctor.specialization}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-slate-500">Experience</span>
-                        <span className="font-medium">
-                          {doctor.experience} years
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-slate-500">Rating</span>
-                        <div className="flex items-center gap-1">
-                          <Star className="h-4 w-4 text-amber-500 fill-amber-500" />
-                          <span className="font-medium">{doctor.rating}</span>
+            {loading ? (
+              <div className="flex items-center justify-center h-64">
+                <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+              </div>
+            ) : filteredDoctors.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredDoctors.map((doctor) => (
+                  <Card
+                    key={doctor.id}
+                    className={`cursor-pointer transition-all ${
+                      selectedDoctor?.id === doctor.id
+                        ? "ring-2 ring-blue-600"
+                        : "hover:shadow-md"
+                    }`}
+                    onClick={() => setSelectedDoctor(doctor)}
+                  >
+                    <CardContent className="p-6">
+                      <div className="flex items-center gap-4 mb-4">
+                        <Avatar fallback={doctor.name} size="lg" />
+                        <div>
+                          <h3 className="font-semibold text-slate-900">
+                            {doctor.name}
+                          </h3>
+                          <p className="text-sm text-blue-600">
+                            {doctor.specialization}
+                          </p>
                         </div>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-slate-500">Consultation Fee</span>
-                        <span className="font-semibold text-emerald-600">
-                          ${doctor.fee}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="mt-4 pt-4 border-t border-slate-100">
-                      <p className="text-sm text-slate-500 mb-2">
-                        Available Today
-                      </p>
-                      <div className="flex flex-wrap gap-2">
-                        {doctor.availableSlots.slice(0, 3).map((slot) => (
-                          <Badge key={slot} variant="secondary" size="sm">
-                            {slot}
-                          </Badge>
-                        ))}
-                        {doctor.availableSlots.length > 3 && (
-                          <Badge variant="primary" size="sm">
-                            +{doctor.availableSlots.length - 3} more
-                          </Badge>
+                      <div className="space-y-2 text-sm">
+                        {doctor.experience && (
+                          <div className="flex justify-between">
+                            <span className="text-slate-500">Experience</span>
+                            <span className="font-medium">
+                              {doctor.experience} years
+                            </span>
+                          </div>
                         )}
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-500">Rating</span>
+                          <div className="flex items-center gap-1">
+                            <Star className="h-4 w-4 text-amber-500 fill-amber-500" />
+                            <span className="font-medium">
+                              {doctor.rating.toFixed(1)}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-500">Consultation Fee</span>
+                          <span className="font-semibold text-emerald-600">
+                            ${doctor.consultationFee}
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                      <div className="mt-4 pt-4 border-t border-slate-100">
+                        <p className="text-sm text-slate-500 mb-2">
+                          Available Slots
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {doctor.availableSlots.slice(0, 3).map((slot) => (
+                            <Badge key={slot} variant="secondary" size="sm">
+                              {slot}
+                            </Badge>
+                          ))}
+                          {doctor.availableSlots.length > 3 && (
+                            <Badge variant="primary" size="sm">
+                              +{doctor.availableSlots.length - 3} more
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <p className="text-slate-500">No doctors found</p>
+              </div>
+            )}
 
             <div className="flex justify-end mt-6">
               <Button
@@ -234,7 +354,7 @@ export default function BookAppointmentPage() {
         )}
 
         {/* Step 2: Choose Date & Time */}
-        {step === 2 && (
+        {step === 2 && selectedDoctor && (
           <div className="max-w-2xl mx-auto">
             <Card>
               <CardHeader>
@@ -242,6 +362,19 @@ export default function BookAppointmentPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-6">
+                  {/* Selected Doctor Summary */}
+                  <div className="p-4 rounded-lg bg-slate-50 flex items-center gap-4">
+                    <Avatar fallback={selectedDoctor.name} size="md" />
+                    <div>
+                      <p className="font-medium text-slate-900">
+                        {selectedDoctor.name}
+                      </p>
+                      <p className="text-sm text-blue-600">
+                        {selectedDoctor.specialization}
+                      </p>
+                    </div>
+                  </div>
+
                   {/* Date Selection */}
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-2">
@@ -251,7 +384,7 @@ export default function BookAppointmentPage() {
                       type="date"
                       value={selectedDate}
                       onChange={(e) => setSelectedDate(e.target.value)}
-                      min={new Date().toISOString().split("T")[0]}
+                      min={getMinDate()}
                     />
                   </div>
 
@@ -261,22 +394,20 @@ export default function BookAppointmentPage() {
                       Available Time Slots
                     </label>
                     <div className="grid grid-cols-3 gap-3">
-                      {doctors
-                        .find((d) => d.id === selectedDoctor)
-                        ?.availableSlots.map((slot) => (
-                          <button
-                            key={slot}
-                            onClick={() => setSelectedSlot(slot)}
-                            className={`p-3 rounded-lg border text-sm font-medium transition-colors ${
-                              selectedSlot === slot
-                                ? "border-blue-600 bg-blue-50 text-blue-700"
-                                : "border-slate-200 hover:border-slate-300"
-                            }`}
-                          >
-                            <Clock className="h-4 w-4 inline mr-2" />
-                            {slot}
-                          </button>
-                        ))}
+                      {selectedDoctor.availableSlots.map((slot) => (
+                        <button
+                          key={slot}
+                          onClick={() => setSelectedSlot(slot)}
+                          className={`p-3 rounded-lg border text-sm font-medium transition-colors ${
+                            selectedSlot === slot
+                              ? "border-blue-600 bg-blue-50 text-blue-700"
+                              : "border-slate-200 hover:border-slate-300"
+                          }`}
+                        >
+                          <Clock className="h-4 w-4 inline mr-2" />
+                          {slot}
+                        </button>
+                      ))}
                     </div>
                   </div>
 
@@ -308,7 +439,7 @@ export default function BookAppointmentPage() {
         )}
 
         {/* Step 3: Confirmation */}
-        {step === 3 && (
+        {step === 3 && selectedDoctor && (
           <div className="max-w-2xl mx-auto">
             <Card>
               <CardHeader>
@@ -319,23 +450,19 @@ export default function BookAppointmentPage() {
                   {/* Doctor Summary */}
                   <div className="p-4 rounded-lg bg-slate-50">
                     <div className="flex items-center gap-4">
-                      <Avatar
-                        fallback={
-                          doctors.find((d) => d.id === selectedDoctor)?.name ||
-                          ""
-                        }
-                        size="lg"
-                      />
+                      <Avatar fallback={selectedDoctor.name} size="lg" />
                       <div>
                         <p className="font-semibold text-slate-900">
-                          {doctors.find((d) => d.id === selectedDoctor)?.name}
+                          {selectedDoctor.name}
                         </p>
                         <p className="text-sm text-blue-600">
-                          {
-                            doctors.find((d) => d.id === selectedDoctor)
-                              ?.specialization
-                          }
+                          {selectedDoctor.specialization}
                         </p>
+                        {selectedDoctor.department && (
+                          <p className="text-xs text-slate-500">
+                            {selectedDoctor.department.name}
+                          </p>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -365,6 +492,12 @@ export default function BookAppointmentPage() {
                     </div>
                   </div>
 
+                  {/* Appointment Type */}
+                  <div className="p-4 rounded-lg border border-slate-200">
+                    <p className="text-sm text-slate-500 mb-1">Appointment Type</p>
+                    <p className="font-semibold capitalize">{appointmentType}</p>
+                  </div>
+
                   {/* Symptoms */}
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1.5">
@@ -386,7 +519,7 @@ export default function BookAppointmentPage() {
                         Consultation Fee
                       </span>
                       <span className="text-xl font-bold text-emerald-700">
-                        ${doctors.find((d) => d.id === selectedDoctor)?.fee}
+                        ${selectedDoctor.consultationFee}
                       </span>
                     </div>
                   </div>
@@ -399,7 +532,7 @@ export default function BookAppointmentPage() {
                 <ChevronLeft className="h-4 w-4 mr-2" />
                 Back
               </Button>
-              <Button onClick={handleSubmit}>
+              <Button onClick={handleSubmit} isLoading={submitting}>
                 <CheckCircle className="h-4 w-4 mr-2" />
                 Confirm Booking
               </Button>

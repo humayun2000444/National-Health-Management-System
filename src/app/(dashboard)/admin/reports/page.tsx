@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Header } from "@/components/dashboard/Header";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -16,42 +16,34 @@ import {
   Download,
   Calendar,
   TrendingUp,
+  TrendingDown,
   Users,
   DollarSign,
   Activity,
+  Loader2,
+  RefreshCw,
 } from "lucide-react";
 
-const monthlyData = [
-  { name: "Jan", appointments: 245, patients: 120, revenue: 45000 },
-  { name: "Feb", appointments: 312, patients: 145, revenue: 52000 },
-  { name: "Mar", appointments: 289, patients: 132, revenue: 48000 },
-  { name: "Apr", appointments: 378, patients: 168, revenue: 61000 },
-  { name: "May", appointments: 356, patients: 155, revenue: 58000 },
-  { name: "Jun", appointments: 425, patients: 189, revenue: 72000 },
-];
-
-const departmentPerformance = [
-  { name: "Cardiology", appointments: 89 },
-  { name: "Neurology", appointments: 67 },
-  { name: "Orthopedics", appointments: 54 },
-  { name: "Pediatrics", appointments: 78 },
-  { name: "Dermatology", appointments: 45 },
-];
-
-const appointmentStatus = [
-  { name: "Completed", value: 65, color: "#10b981" },
-  { name: "Confirmed", value: 20, color: "#2563eb" },
-  { name: "Pending", value: 10, color: "#f59e0b" },
-  { name: "Cancelled", value: 5, color: "#ef4444" },
-];
-
-const doctorPerformance = [
-  { name: "Dr. Wilson", patients: 48, rating: 4.9 },
-  { name: "Dr. Chen", patients: 42, rating: 4.8 },
-  { name: "Dr. Brown", patients: 38, rating: 4.7 },
-  { name: "Dr. Parker", patients: 35, rating: 4.6 },
-  { name: "Dr. Kim", patients: 52, rating: 4.8 },
-];
+interface ReportData {
+  summary: {
+    totalAppointments: number;
+    appointmentChange: string;
+    newPatients: number;
+    patientChange: string;
+    totalRevenue: number;
+    revenueChange: string;
+    completionRate: string;
+  };
+  appointmentStatus: Array<{ name: string; value: number; color: string }>;
+  departmentPerformance: Array<{ name: string; appointments: number }>;
+  doctorPerformance: Array<{ name: string; patients: number; department: string }>;
+  monthlyData: Array<{ name: string; appointments: number; revenue: number }>;
+  insights: {
+    peakHours: string;
+    busiestDay: string;
+    avgAppointmentsPerDay: number;
+  };
+}
 
 const periodOptions = [
   { value: "7d", label: "Last 7 days" },
@@ -62,6 +54,75 @@ const periodOptions = [
 
 export default function ReportsPage() {
   const [period, setPeriod] = useState("30d");
+  const [data, setData] = useState<ReportData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    fetchReports();
+  }, [period]);
+
+  const fetchReports = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const response = await fetch(`/api/admin/reports?period=${period}`);
+      if (!response.ok) throw new Error("Failed to fetch reports");
+      const reportData = await response.json();
+      setData(reportData);
+    } catch (err) {
+      setError("Failed to load reports");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(value);
+  };
+
+  const formatChange = (change: string) => {
+    const value = parseFloat(change);
+    const isPositive = value >= 0;
+    return {
+      text: `${isPositive ? "+" : ""}${change}% from last period`,
+      isPositive,
+    };
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen">
+        <Header title="Reports & Analytics" subtitle="Hospital performance insights" />
+        <div className="flex items-center justify-center h-96">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !data) {
+    return (
+      <div className="min-h-screen">
+        <Header title="Reports & Analytics" subtitle="Hospital performance insights" />
+        <div className="flex flex-col items-center justify-center h-96 gap-4">
+          <p className="text-red-600">{error || "No data available"}</p>
+          <Button onClick={fetchReports}>
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Retry
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  const { summary, appointmentStatus, departmentPerformance, doctorPerformance, monthlyData, insights } = data;
 
   return (
     <div className="min-h-screen">
@@ -78,6 +139,10 @@ export default function ReportsPage() {
                 onChange={(e) => setPeriod(e.target.value)}
               />
             </div>
+            <Button variant="outline" onClick={fetchReports}>
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Refresh
+            </Button>
           </div>
           <Button variant="outline">
             <Download className="h-4 w-4 mr-2" />
@@ -95,8 +160,19 @@ export default function ReportsPage() {
                 </div>
                 <div>
                   <p className="text-sm text-slate-500">Total Appointments</p>
-                  <p className="text-xl font-bold text-slate-900">2,005</p>
-                  <p className="text-xs text-emerald-600">+12.5% from last period</p>
+                  <p className="text-xl font-bold text-slate-900">
+                    {summary.totalAppointments.toLocaleString()}
+                  </p>
+                  <p className={`text-xs flex items-center gap-1 ${
+                    parseFloat(summary.appointmentChange) >= 0 ? "text-emerald-600" : "text-red-600"
+                  }`}>
+                    {parseFloat(summary.appointmentChange) >= 0 ? (
+                      <TrendingUp className="h-3 w-3" />
+                    ) : (
+                      <TrendingDown className="h-3 w-3" />
+                    )}
+                    {formatChange(summary.appointmentChange).text}
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -109,8 +185,19 @@ export default function ReportsPage() {
                 </div>
                 <div>
                   <p className="text-sm text-slate-500">New Patients</p>
-                  <p className="text-xl font-bold text-slate-900">909</p>
-                  <p className="text-xs text-emerald-600">+8.2% from last period</p>
+                  <p className="text-xl font-bold text-slate-900">
+                    {summary.newPatients.toLocaleString()}
+                  </p>
+                  <p className={`text-xs flex items-center gap-1 ${
+                    parseFloat(summary.patientChange) >= 0 ? "text-emerald-600" : "text-red-600"
+                  }`}>
+                    {parseFloat(summary.patientChange) >= 0 ? (
+                      <TrendingUp className="h-3 w-3" />
+                    ) : (
+                      <TrendingDown className="h-3 w-3" />
+                    )}
+                    {formatChange(summary.patientChange).text}
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -123,8 +210,19 @@ export default function ReportsPage() {
                 </div>
                 <div>
                   <p className="text-sm text-slate-500">Total Revenue</p>
-                  <p className="text-xl font-bold text-slate-900">$336,000</p>
-                  <p className="text-xs text-emerald-600">+15.3% from last period</p>
+                  <p className="text-xl font-bold text-slate-900">
+                    {formatCurrency(summary.totalRevenue)}
+                  </p>
+                  <p className={`text-xs flex items-center gap-1 ${
+                    parseFloat(summary.revenueChange) >= 0 ? "text-emerald-600" : "text-red-600"
+                  }`}>
+                    {parseFloat(summary.revenueChange) >= 0 ? (
+                      <TrendingUp className="h-3 w-3" />
+                    ) : (
+                      <TrendingDown className="h-3 w-3" />
+                    )}
+                    {formatChange(summary.revenueChange).text}
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -137,8 +235,12 @@ export default function ReportsPage() {
                 </div>
                 <div>
                   <p className="text-sm text-slate-500">Completion Rate</p>
-                  <p className="text-xl font-bold text-slate-900">94.2%</p>
-                  <p className="text-xs text-emerald-600">+2.1% from last period</p>
+                  <p className="text-xl font-bold text-slate-900">
+                    {summary.completionRate}%
+                  </p>
+                  <p className="text-xs text-slate-500">
+                    Of all appointments
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -147,68 +249,96 @@ export default function ReportsPage() {
 
         {/* Charts Row 1 */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          <ChartCard title="Monthly Trends">
-            <MultiLineChart
-              data={monthlyData}
-              lines={[
-                { dataKey: "appointments", color: "#2563eb", name: "Appointments" },
-                { dataKey: "patients", color: "#10b981", name: "New Patients" },
-              ]}
-              height={300}
-            />
+          <ChartCard title="Appointment Trends">
+            {monthlyData.length > 0 ? (
+              <SimpleLineChart
+                data={monthlyData}
+                dataKey="appointments"
+                color="#2563eb"
+                height={300}
+              />
+            ) : (
+              <div className="h-[300px] flex items-center justify-center text-slate-500">
+                No data available for this period
+              </div>
+            )}
           </ChartCard>
           <ChartCard title="Revenue Over Time">
-            <SimpleLineChart
-              data={monthlyData}
-              dataKey="revenue"
-              color="#8b5cf6"
-              height={300}
-            />
+            {monthlyData.length > 0 ? (
+              <SimpleLineChart
+                data={monthlyData}
+                dataKey="revenue"
+                color="#8b5cf6"
+                height={300}
+              />
+            ) : (
+              <div className="h-[300px] flex items-center justify-center text-slate-500">
+                No data available for this period
+              </div>
+            )}
           </ChartCard>
         </div>
 
         {/* Charts Row 2 */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
           <ChartCard title="Appointments by Department">
-            <SimpleBarChart
-              data={departmentPerformance}
-              dataKey="appointments"
-              color="#2563eb"
-              height={250}
-            />
+            {departmentPerformance.length > 0 ? (
+              <SimpleBarChart
+                data={departmentPerformance}
+                dataKey="appointments"
+                color="#2563eb"
+                height={250}
+              />
+            ) : (
+              <div className="h-[250px] flex items-center justify-center text-slate-500">
+                No department data
+              </div>
+            )}
           </ChartCard>
           <ChartCard title="Appointment Status">
-            <SimplePieChart data={appointmentStatus} height={250} />
+            {appointmentStatus.length > 0 ? (
+              <SimplePieChart data={appointmentStatus} height={250} />
+            ) : (
+              <div className="h-[250px] flex items-center justify-center text-slate-500">
+                No status data
+              </div>
+            )}
           </ChartCard>
           <Card>
             <CardHeader>
               <CardTitle>Top Performing Doctors</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
-                {doctorPerformance.map((doctor, index) => (
-                  <div
-                    key={doctor.name}
-                    className="flex items-center justify-between p-3 rounded-lg bg-slate-50"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
-                        {index + 1}
+              {doctorPerformance.length > 0 ? (
+                <div className="space-y-3">
+                  {doctorPerformance.map((doctor, index) => (
+                    <div
+                      key={doctor.name}
+                      className="flex items-center justify-between p-3 rounded-lg bg-slate-50"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                          {index + 1}
+                        </div>
+                        <div>
+                          <p className="font-medium text-slate-900">{doctor.name}</p>
+                          <p className="text-xs text-slate-500">
+                            {doctor.department}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-medium text-slate-900">{doctor.name}</p>
-                        <p className="text-xs text-slate-500">
-                          {doctor.patients} patients
-                        </p>
+                      <div className="text-right">
+                        <p className="font-semibold text-slate-900">{doctor.patients}</p>
+                        <p className="text-xs text-slate-500">appointments</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-1 text-amber-500">
-                      <TrendingUp className="h-4 w-4" />
-                      <span className="text-sm font-medium">{doctor.rating}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="h-[200px] flex items-center justify-center text-slate-500">
+                  No doctor data
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -224,7 +354,7 @@ export default function ReportsPage() {
                 <p className="text-sm font-medium text-blue-900 mb-1">
                   Peak Hours
                 </p>
-                <p className="text-lg font-bold text-blue-700">9 AM - 11 AM</p>
+                <p className="text-lg font-bold text-blue-700">{insights.peakHours}</p>
                 <p className="text-xs text-blue-600 mt-1">
                   Most appointments scheduled during this time
                 </p>
@@ -233,18 +363,20 @@ export default function ReportsPage() {
                 <p className="text-sm font-medium text-emerald-900 mb-1">
                   Busiest Day
                 </p>
-                <p className="text-lg font-bold text-emerald-700">Wednesday</p>
+                <p className="text-lg font-bold text-emerald-700">{insights.busiestDay}</p>
                 <p className="text-xs text-emerald-600 mt-1">
-                  Average 45 appointments per Wednesday
+                  Highest appointment volume
                 </p>
               </div>
               <div className="p-4 rounded-lg bg-violet-50 border border-violet-100">
                 <p className="text-sm font-medium text-violet-900 mb-1">
-                  Avg. Wait Time
+                  Daily Average
                 </p>
-                <p className="text-lg font-bold text-violet-700">12 minutes</p>
+                <p className="text-lg font-bold text-violet-700">
+                  {insights.avgAppointmentsPerDay} appointments
+                </p>
                 <p className="text-xs text-violet-600 mt-1">
-                  Down from 18 minutes last month
+                  Average appointments per day
                 </p>
               </div>
             </div>
