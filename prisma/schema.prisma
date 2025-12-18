@@ -102,6 +102,8 @@ model Doctor {
   appointments    Appointment[]
   prescriptions   Prescription[]
   medicalRecords  MedicalRecord[]
+  labTests        LabTest[]
+  vitalSigns      VitalSign[]
 
   isActive        Boolean  @default(true)
   createdAt       DateTime @default(now()) @map("created_at")
@@ -139,6 +141,11 @@ model Patient {
   appointments     Appointment[]
   prescriptions    Prescription[]
   medicalRecords   MedicalRecord[]
+  invoices         Invoice[]
+  labTests         LabTest[]
+  vitalSigns       VitalSign[]
+  emergencyCases   EmergencyCase[]
+  waitingQueue     WaitingQueue[]
 
   isActive         Boolean   @default(true)
   createdAt        DateTime  @default(now()) @map("created_at")
@@ -251,4 +258,285 @@ model MedicalRecord {
   updatedAt    DateTime @updatedAt @map("updated_at")
 
   @@map("medical_records")
+}
+
+// ==================== BILLING & INVOICES ====================
+
+model Invoice {
+  id            Int      @id @default(autoincrement())
+  invoiceNumber String   @unique @map("invoice_number")
+
+  patientId     Int      @map("patient_id")
+  patient       Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  hospitalId    String   @map("hospital_id")
+
+  // Invoice Details
+  items         Json     // Array of {description, quantity, unitPrice, total}
+  subtotal      Decimal  @db.Decimal(10, 2)
+  tax           Decimal  @default(0) @db.Decimal(10, 2)
+  discount      Decimal  @default(0) @db.Decimal(10, 2)
+  total         Decimal  @db.Decimal(10, 2)
+
+  status        String   @default("pending") // pending, paid, partial, overdue, cancelled
+  dueDate       DateTime @map("due_date")
+  paidAmount    Decimal  @default(0) @map("paid_amount") @db.Decimal(10, 2)
+  paidDate      DateTime? @map("paid_date")
+
+  // References
+  appointmentId Int?     @map("appointment_id")
+  notes         String?  @db.Text
+
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  payments      Payment[]
+
+  @@map("invoices")
+}
+
+model Payment {
+  id            Int      @id @default(autoincrement())
+
+  invoiceId     Int      @map("invoice_id")
+  invoice       Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  amount        Decimal  @db.Decimal(10, 2)
+  method        String   // cash, card, insurance, bank_transfer, online
+  reference     String?  // Transaction ID or reference number
+  notes         String?  @db.Text
+
+  paidAt        DateTime @default(now()) @map("paid_at")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  @@map("payments")
+}
+
+// ==================== LAB RESULTS ====================
+
+model LabTest {
+  id           Int      @id @default(autoincrement())
+
+  patientId    Int      @map("patient_id")
+  patient      Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  orderedById  Int      @map("ordered_by_id")
+  orderedBy    Doctor   @relation(fields: [orderedById], references: [id], onDelete: Cascade)
+
+  hospitalId   String   @map("hospital_id")
+
+  // Test Details
+  testName     String   @map("test_name")
+  testType     String   @map("test_type") // blood, urine, imaging, biopsy, culture, genetic, cardiac, other
+
+  status       String   @default("pending") // pending, in_progress, completed, cancelled
+  priority     String   @default("routine") // routine, urgent, stat
+
+  // Results (JSON for flexibility)
+  results         Json?    // {parameter, value, unit, referenceRange, flag}
+  referenceRange  Json?    @map("reference_range")
+  interpretation  String?  @db.Text
+
+  resultDate   DateTime? @map("result_date")
+  appointmentId Int?     @map("appointment_id")
+
+  notes        String?  @db.Text
+
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("lab_tests")
+}
+
+// ==================== VITAL SIGNS ====================
+
+model VitalSign {
+  id           Int      @id @default(autoincrement())
+
+  patientId    Int      @map("patient_id")
+  patient      Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  recordedById Int      @map("recorded_by_id")
+  recordedBy   Doctor   @relation(fields: [recordedById], references: [id], onDelete: Cascade)
+
+  hospitalId   String   @map("hospital_id")
+  appointmentId Int?    @map("appointment_id")
+
+  // Vital Measurements
+  bloodPressureSystolic  Int?    @map("bp_systolic")  // mmHg
+  bloodPressureDiastolic Int?    @map("bp_diastolic") // mmHg
+  heartRate              Int?    @map("heart_rate")   // bpm
+  temperature            Decimal? @db.Decimal(4, 1)   // Celsius
+  respiratoryRate        Int?    @map("respiratory_rate") // breaths/min
+  oxygenSaturation       Int?    @map("oxygen_saturation") // SpO2 %
+  weight                 Decimal? @db.Decimal(5, 2)   // kg
+  height                 Decimal? @db.Decimal(5, 2)   // cm
+  bloodGlucose           Int?    @map("blood_glucose") // mg/dL
+  painLevel              Int?    @map("pain_level")   // 0-10 scale
+
+  notes        String?  @db.Text
+  recordedAt   DateTime @default(now()) @map("recorded_at")
+
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@map("vital_signs")
+}
+
+// ==================== NOTIFICATIONS ====================
+
+model Notification {
+  id           Int      @id @default(autoincrement())
+
+  // Recipient (polymorphic - can be admin, doctor, or patient)
+  userId       Int      @map("user_id")
+  userType     String   @map("user_type") // admin, doctor, patient
+
+  hospitalId   String   @map("hospital_id")
+
+  // Notification Content
+  type         String   // appointment_booked, prescription_created, lab_results_ready, invoice_created, etc.
+  title        String
+  message      String   @db.Text
+  link         String?  // URL to navigate to
+  metadata     Json?    // Additional data
+
+  isRead       Boolean  @default(false) @map("is_read")
+  readAt       DateTime? @map("read_at")
+
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@index([userType, userId])
+  @@map("notifications")
+}
+
+// ==================== AUDIT LOG ====================
+
+model AuditLog {
+  id           Int      @id @default(autoincrement())
+
+  // Who performed the action
+  userId       Int      @map("user_id")
+  userType     String   @map("user_type") // admin, doctor, patient
+
+  hospitalId   String   @map("hospital_id")
+
+  // What action was performed
+  action       String   // login, logout, create, read, update, delete, export, print, access_denied
+  resource     String   // user, patient, doctor, appointment, prescription, medical_record, lab_test, etc.
+  resourceId   String?  @map("resource_id")
+
+  // Details
+  description  String   @db.Text
+  metadata     Json?    // Additional context data
+  ipAddress    String?  @map("ip_address")
+  userAgent    String?  @map("user_agent") @db.Text
+
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@index([hospitalId, createdAt])
+  @@index([userType, userId])
+  @@map("audit_logs")
+}
+
+// ==================== DRUG DATABASE ====================
+
+model Drug {
+  id               Int      @id @default(autoincrement())
+
+  name             String
+  genericName      String?  @map("generic_name")
+  brandNames       Json?    @map("brand_names") // Array of brand names
+  category         String   // antibiotic, analgesic, etc.
+
+  dosageForms      Json?    @map("dosage_forms") // tablet, capsule, syrup, etc.
+  strengths        Json?    // Available strengths
+
+  // Safety Information
+  contraindications String? @db.Text
+  sideEffects       String? @map("side_effects") @db.Text
+  warnings          String? @db.Text
+
+  // Interactions (JSON array of drug IDs that interact)
+  interactions     Json?
+  interactionSeverity Json? @map("interaction_severity") // {drugId: severity}
+
+  pregnancyCategory String? @map("pregnancy_category") // A, B, C, D, X
+
+  isControlled     Boolean @default(false) @map("is_controlled")
+  isActive         Boolean @default(true) @map("is_active")
+
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  @@map("drugs")
+}
+
+// ==================== EMERGENCY CASES ====================
+
+model EmergencyCase {
+  id           Int      @id @default(autoincrement())
+
+  patientId    Int?     @map("patient_id")
+  patient      Patient? @relation(fields: [patientId], references: [id])
+
+  hospitalId   String   @map("hospital_id")
+
+  // Patient Info (for unregistered patients)
+  patientName  String?  @map("patient_name")
+  patientAge   Int?     @map("patient_age")
+  patientGender String? @map("patient_gender")
+  contactPhone String?  @map("contact_phone")
+
+  // Emergency Details
+  triageLevel  String   @map("triage_level") // 1-immediate, 2-emergent, 3-urgent, 4-less_urgent, 5-non_urgent
+  chiefComplaint String @map("chief_complaint") @db.Text
+  vitalSigns   Json?    @map("vital_signs")
+
+  // Status Tracking
+  status       String   @default("waiting") // waiting, in_treatment, admitted, discharged, transferred
+  assignedDoctorId Int? @map("assigned_doctor_id")
+
+  arrivalTime  DateTime @default(now()) @map("arrival_time")
+  treatmentStartTime DateTime? @map("treatment_start_time")
+  dischargeTime DateTime? @map("discharge_time")
+
+  disposition  String?  // admitted, discharged, transferred, deceased
+  notes        String?  @db.Text
+
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("emergency_cases")
+}
+
+// ==================== WAITING QUEUE ====================
+
+model WaitingQueue {
+  id           Int      @id @default(autoincrement())
+
+  patientId    Int      @map("patient_id")
+  patient      Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  departmentId Int?     @map("department_id")
+  doctorId     Int?     @map("doctor_id")
+  appointmentId Int?    @map("appointment_id")
+
+  hospitalId   String   @map("hospital_id")
+
+  queueNumber  Int      @map("queue_number")
+  priority     String   @default("normal") // normal, priority, emergency
+
+  status       String   @default("waiting") // waiting, called, in_consultation, completed, no_show
+
+  checkInTime  DateTime @default(now()) @map("check_in_time")
+  calledTime   DateTime? @map("called_time")
+  completedTime DateTime? @map("completed_time")
+
+  estimatedWait Int?    @map("estimated_wait") // in minutes
+
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@index([hospitalId, status])
+  @@map("waiting_queue")
 }

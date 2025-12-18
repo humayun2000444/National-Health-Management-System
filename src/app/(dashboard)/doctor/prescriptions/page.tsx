@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Header } from "@/components/dashboard/Header";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Avatar } from "@/components/ui/Avatar";
 import { Modal, ModalFooter } from "@/components/ui/Modal";
 import { Table, Column } from "@/components/ui/Table";
+import { DrugInteractionAlert } from "@/components/ui/DrugInteractionAlert";
 import {
   Plus,
   Search,
@@ -21,6 +22,7 @@ import {
   Loader2,
   AlertCircle,
   CheckCircle,
+  ShieldAlert,
 } from "lucide-react";
 
 interface Medication {
@@ -47,6 +49,14 @@ interface Prescription {
 interface Patient {
   id: number;
   name: string;
+  currentMedications?: string[];
+}
+
+interface InteractionWarning {
+  severity: "mild" | "moderate" | "severe" | "contraindicated";
+  drugs: string[];
+  description: string;
+  recommendation: string;
 }
 
 export default function PrescriptionsPage() {
@@ -68,6 +78,12 @@ export default function PrescriptionsPage() {
   const [medications, setMedications] = useState<Medication[]>([
     { name: "", dosage: "", frequency: "", duration: "" },
   ]);
+
+  // Drug interaction states
+  const [interactionWarnings, setInteractionWarnings] = useState<InteractionWarning[]>([]);
+  const [checkingInteractions, setCheckingInteractions] = useState(false);
+  const [interactionsAcknowledged, setInteractionsAcknowledged] = useState(false);
+  const [patientMedications, setPatientMedications] = useState<string[]>([]);
 
   useEffect(() => {
     fetchPrescriptions();
@@ -102,6 +118,82 @@ export default function PrescriptionsPage() {
     }
   };
 
+  // Fetch patient's current medications when patient is selected
+  const fetchPatientMedications = async (patientId: string) => {
+    if (!patientId) {
+      setPatientMedications([]);
+      return;
+    }
+    try {
+      const response = await fetch(`/api/doctor/patients/${patientId}/medications`);
+      if (response.ok) {
+        const data = await response.json();
+        setPatientMedications(data.medications || []);
+      }
+    } catch (err) {
+      console.error("Failed to fetch patient medications:", err);
+    }
+  };
+
+  // Check for drug interactions
+  const checkDrugInteractions = useCallback(async () => {
+    const medicationNames = medications
+      .map((m) => m.name.trim())
+      .filter((name) => name.length > 0);
+
+    if (medicationNames.length === 0) {
+      setInteractionWarnings([]);
+      return;
+    }
+
+    // Combine new medications with patient's existing medications
+    const allMedications = [...medicationNames, ...patientMedications];
+
+    if (allMedications.length < 2) {
+      setInteractionWarnings([]);
+      return;
+    }
+
+    setCheckingInteractions(true);
+    try {
+      const response = await fetch("/api/drug-interactions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ medications: allMedications }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setInteractionWarnings(data.warnings || []);
+        // Reset acknowledgment when new warnings are found
+        if (data.warnings?.length > 0) {
+          setInteractionsAcknowledged(false);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to check drug interactions:", err);
+    } finally {
+      setCheckingInteractions(false);
+    }
+  }, [medications, patientMedications]);
+
+  // Debounce interaction checking when medications change
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      checkDrugInteractions();
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [checkDrugInteractions]);
+
+  // Fetch patient medications when patient selection changes
+  useEffect(() => {
+    if (selectedPatient) {
+      fetchPatientMedications(selectedPatient);
+    } else {
+      setPatientMedications([]);
+    }
+  }, [selectedPatient]);
+
   const addMedication = () => {
     setMedications([
       ...medications,
@@ -125,11 +217,24 @@ export default function PrescriptionsPage() {
     setInstructions("");
     setValidUntil("");
     setMedications([{ name: "", dosage: "", frequency: "", duration: "" }]);
+    setInteractionWarnings([]);
+    setInteractionsAcknowledged(false);
+    setPatientMedications([]);
   };
 
   const handleCreatePrescription = async () => {
     if (!selectedPatient || !diagnosis || !medications[0].name) {
       setError("Please fill in all required fields");
+      return;
+    }
+
+    // Check for severe/contraindicated interactions that need acknowledgment
+    const hasSevereInteractions = interactionWarnings.some(
+      (w) => w.severity === "severe" || w.severity === "contraindicated"
+    );
+
+    if (hasSevereInteractions && !interactionsAcknowledged) {
+      setError("Please review and acknowledge the drug interaction warnings before proceeding.");
       return;
     }
 
@@ -481,6 +586,60 @@ export default function PrescriptionsPage() {
               ))}
             </div>
           </div>
+
+          {/* Drug Interaction Warnings */}
+          {checkingInteractions && (
+            <div className="flex items-center gap-2 p-4 bg-slate-50 rounded-lg border border-slate-200">
+              <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+              <span className="text-sm text-slate-600">Checking for drug interactions...</span>
+            </div>
+          )}
+
+          {!checkingInteractions && interactionWarnings.length > 0 && (
+            <div className="space-y-4">
+              <DrugInteractionAlert
+                warnings={interactionWarnings}
+                onDismiss={() => setInteractionWarnings([])}
+              />
+
+              {/* Show patient's current medications if any */}
+              {patientMedications.length > 0 && (
+                <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                  <p className="text-sm font-medium text-blue-800 mb-1">
+                    Patient&apos;s Current Medications:
+                  </p>
+                  <p className="text-sm text-blue-700">
+                    {patientMedications.join(", ")}
+                  </p>
+                </div>
+              )}
+
+              {/* Acknowledgment checkbox for severe interactions */}
+              {interactionWarnings.some(
+                (w) => w.severity === "severe" || w.severity === "contraindicated"
+              ) && (
+                <label className="flex items-start gap-3 p-4 bg-red-50 rounded-lg border border-red-200 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={interactionsAcknowledged}
+                    onChange={(e) => setInteractionsAcknowledged(e.target.checked)}
+                    className="mt-0.5 h-4 w-4 rounded border-red-300 text-red-600 focus:ring-red-500"
+                  />
+                  <div>
+                    <p className="font-medium text-red-800 flex items-center gap-2">
+                      <ShieldAlert className="h-4 w-4" />
+                      Acknowledge Drug Interactions
+                    </p>
+                    <p className="text-sm text-red-700 mt-1">
+                      I have reviewed the drug interaction warnings and determined that
+                      the benefits of this prescription outweigh the risks. I will
+                      monitor the patient accordingly.
+                    </p>
+                  </div>
+                </label>
+              )}
+            </div>
+          )}
 
           {/* Instructions */}
           <div>

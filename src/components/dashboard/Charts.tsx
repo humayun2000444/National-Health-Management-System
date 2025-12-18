@@ -16,6 +16,9 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
+  RadialBarChart,
+  RadialBar,
+  ComposedChart,
 } from "recharts";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 
@@ -308,5 +311,243 @@ export function MultiLineChart({
         ))}
       </LineChart>
     </ResponsiveContainer>
+  );
+}
+
+// Stacked Bar Chart
+interface StackedBarChartProps {
+  data: BarChartData[];
+  bars: { dataKey: string; color: string; name?: string }[];
+  xAxisKey?: string;
+  height?: number;
+}
+
+export function StackedBarChart({
+  data,
+  bars,
+  xAxisKey = "name",
+  height = 300,
+}: StackedBarChartProps) {
+  return (
+    <ResponsiveContainer width="100%" height={height}>
+      <BarChart data={data}>
+        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+        <XAxis
+          dataKey={xAxisKey}
+          tick={{ fill: "#64748b", fontSize: 12 }}
+          axisLine={{ stroke: "#e2e8f0" }}
+        />
+        <YAxis
+          tick={{ fill: "#64748b", fontSize: 12 }}
+          axisLine={{ stroke: "#e2e8f0" }}
+        />
+        <Tooltip
+          contentStyle={{
+            backgroundColor: "#fff",
+            border: "1px solid #e2e8f0",
+            borderRadius: "8px",
+            boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+          }}
+        />
+        <Legend />
+        {bars.map((bar, index) => (
+          <Bar
+            key={bar.dataKey}
+            dataKey={bar.dataKey}
+            name={bar.name || bar.dataKey}
+            stackId="stack"
+            fill={bar.color}
+            radius={index === bars.length - 1 ? [4, 4, 0, 0] : [0, 0, 0, 0]}
+          />
+        ))}
+      </BarChart>
+    </ResponsiveContainer>
+  );
+}
+
+// Radial Progress Chart
+interface RadialProgressChartProps {
+  data: { name: string; value: number; fill: string }[];
+  height?: number;
+}
+
+export function RadialProgressChart({
+  data,
+  height = 300,
+}: RadialProgressChartProps) {
+  return (
+    <ResponsiveContainer width="100%" height={height}>
+      <RadialBarChart
+        cx="50%"
+        cy="50%"
+        innerRadius="30%"
+        outerRadius="100%"
+        barSize={20}
+        data={data}
+        startAngle={180}
+        endAngle={0}
+      >
+        <RadialBar
+          background
+          dataKey="value"
+          cornerRadius={10}
+        />
+        <Tooltip
+          contentStyle={{
+            backgroundColor: "#fff",
+            border: "1px solid #e2e8f0",
+            borderRadius: "8px",
+            boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+          }}
+        />
+        <Legend
+          iconSize={10}
+          layout="horizontal"
+          verticalAlign="bottom"
+          align="center"
+        />
+      </RadialBarChart>
+    </ResponsiveContainer>
+  );
+}
+
+// Composed Chart (Bar + Line)
+interface ComposedChartProps {
+  data: LineChartData[];
+  barDataKey: string;
+  lineDataKey: string;
+  barColor?: string;
+  lineColor?: string;
+  xAxisKey?: string;
+  height?: number;
+}
+
+export function SimpleComposedChart({
+  data,
+  barDataKey,
+  lineDataKey,
+  barColor = "#2563eb",
+  lineColor = "#10b981",
+  xAxisKey = "name",
+  height = 300,
+}: ComposedChartProps) {
+  return (
+    <ResponsiveContainer width="100%" height={height}>
+      <ComposedChart data={data}>
+        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+        <XAxis
+          dataKey={xAxisKey}
+          tick={{ fill: "#64748b", fontSize: 12 }}
+          axisLine={{ stroke: "#e2e8f0" }}
+        />
+        <YAxis
+          tick={{ fill: "#64748b", fontSize: 12 }}
+          axisLine={{ stroke: "#e2e8f0" }}
+        />
+        <Tooltip
+          contentStyle={{
+            backgroundColor: "#fff",
+            border: "1px solid #e2e8f0",
+            borderRadius: "8px",
+            boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+          }}
+        />
+        <Legend />
+        <Bar dataKey={barDataKey} fill={barColor} radius={[4, 4, 0, 0]} />
+        <Line
+          type="monotone"
+          dataKey={lineDataKey}
+          stroke={lineColor}
+          strokeWidth={2}
+          dot={{ fill: lineColor, strokeWidth: 2 }}
+        />
+      </ComposedChart>
+    </ResponsiveContainer>
+  );
+}
+
+// Mini Sparkline Chart
+interface SparklineProps {
+  data: number[];
+  color?: string;
+  height?: number;
+}
+
+export function Sparkline({
+  data,
+  color = "#2563eb",
+  height = 40,
+}: SparklineProps) {
+  const chartData = data.map((value, index) => ({ value, index }));
+
+  return (
+    <ResponsiveContainer width="100%" height={height}>
+      <AreaChart data={chartData}>
+        <defs>
+          <linearGradient id="sparklineGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%" stopColor={color} stopOpacity={0.3} />
+            <stop offset="95%" stopColor={color} stopOpacity={0} />
+          </linearGradient>
+        </defs>
+        <Area
+          type="monotone"
+          dataKey="value"
+          stroke={color}
+          strokeWidth={2}
+          fill="url(#sparklineGradient)"
+        />
+      </AreaChart>
+    </ResponsiveContainer>
+  );
+}
+
+// Gauge Chart
+interface GaugeChartProps {
+  value: number;
+  max?: number;
+  color?: string;
+  label?: string;
+  height?: number;
+}
+
+export function GaugeChart({
+  value,
+  max = 100,
+  color = "#2563eb",
+  label,
+  height = 200,
+}: GaugeChartProps) {
+  const percentage = Math.min((value / max) * 100, 100);
+  const data = [
+    { name: "value", value: percentage, fill: color },
+    { name: "remaining", value: 100 - percentage, fill: "#e2e8f0" },
+  ];
+
+  return (
+    <div className="relative">
+      <ResponsiveContainer width="100%" height={height}>
+        <PieChart>
+          <Pie
+            data={data}
+            cx="50%"
+            cy="50%"
+            startAngle={180}
+            endAngle={0}
+            innerRadius="60%"
+            outerRadius="100%"
+            paddingAngle={0}
+            dataKey="value"
+          >
+            {data.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={entry.fill} />
+            ))}
+          </Pie>
+        </PieChart>
+      </ResponsiveContainer>
+      <div className="absolute inset-0 flex flex-col items-center justify-center" style={{ marginTop: height * 0.15 }}>
+        <span className="text-3xl font-bold text-slate-900">{value}</span>
+        {label && <span className="text-sm text-slate-500">{label}</span>}
+      </div>
+    </div>
   );
 }

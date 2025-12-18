@@ -19,6 +19,11 @@ import {
   Heart,
   ChevronLeft,
   ChevronRight,
+  CreditCard,
+  Shield,
+  FlaskConical,
+  Activity,
+  Siren,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Avatar } from "@/components/ui/Avatar";
@@ -31,10 +36,13 @@ interface NavItem {
 
 const adminNavItems: NavItem[] = [
   { name: "Dashboard", href: "/admin", icon: <LayoutDashboard className="h-5 w-5" /> },
+  { name: "Emergency", href: "/admin/emergency", icon: <Siren className="h-5 w-5" /> },
   { name: "Doctors", href: "/admin/doctors", icon: <Stethoscope className="h-5 w-5" /> },
   { name: "Patients", href: "/admin/patients", icon: <Users className="h-5 w-5" /> },
   { name: "Appointments", href: "/admin/appointments", icon: <Calendar className="h-5 w-5" /> },
+  { name: "Billing", href: "/admin/billing", icon: <CreditCard className="h-5 w-5" /> },
   { name: "Departments", href: "/admin/departments", icon: <Building2 className="h-5 w-5" /> },
+  { name: "Audit Logs", href: "/admin/audit-logs", icon: <Shield className="h-5 w-5" /> },
   { name: "Reports", href: "/admin/reports", icon: <ClipboardList className="h-5 w-5" /> },
   { name: "Settings", href: "/admin/settings", icon: <Settings className="h-5 w-5" /> },
 ];
@@ -45,6 +53,8 @@ const doctorNavItems: NavItem[] = [
   { name: "My Patients", href: "/doctor/patients", icon: <Users className="h-5 w-5" /> },
   { name: "Prescriptions", href: "/doctor/prescriptions", icon: <FileText className="h-5 w-5" /> },
   { name: "Medical Records", href: "/doctor/records", icon: <ClipboardList className="h-5 w-5" /> },
+  { name: "Lab Tests", href: "/doctor/lab-tests", icon: <FlaskConical className="h-5 w-5" /> },
+  { name: "Vital Signs", href: "/doctor/vitals", icon: <Activity className="h-5 w-5" /> },
   { name: "Schedule", href: "/doctor/schedule", icon: <Clock className="h-5 w-5" /> },
 ];
 
@@ -54,6 +64,8 @@ const patientNavItems: NavItem[] = [
   { name: "My Appointments", href: "/patient/appointments", icon: <Clock className="h-5 w-5" /> },
   { name: "Prescriptions", href: "/patient/prescriptions", icon: <FileText className="h-5 w-5" /> },
   { name: "Medical Records", href: "/patient/records", icon: <ClipboardList className="h-5 w-5" /> },
+  { name: "Lab Results", href: "/patient/lab-tests", icon: <FlaskConical className="h-5 w-5" /> },
+  { name: "Vital Signs", href: "/patient/vitals", icon: <Activity className="h-5 w-5" /> },
   { name: "Profile", href: "/patient/profile", icon: <UserCog className="h-5 w-5" /> },
 ];
 

@@ -11,6 +11,8 @@ import {
   SimpleBarChart,
   SimplePieChart,
   MultiLineChart,
+  GaugeChart,
+  SimpleAreaChart,
 } from "@/components/dashboard/Charts";
 import {
   Download,
@@ -245,6 +247,49 @@ export default function ReportsPage() {
               </div>
             </CardContent>
           </Card>
+        </div>
+
+        {/* Completion Gauge */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+          <ChartCard title="Appointment Completion Rate">
+            <GaugeChart
+              value={parseFloat(summary.completionRate) || 0}
+              max={100}
+              color={parseFloat(summary.completionRate) >= 80 ? "#10b981" : parseFloat(summary.completionRate) >= 60 ? "#f59e0b" : "#ef4444"}
+              label="% Completed"
+              height={200}
+            />
+          </ChartCard>
+          <ChartCard title="Combined Trends">
+            {monthlyData.length > 0 ? (
+              <MultiLineChart
+                data={monthlyData}
+                lines={[
+                  { dataKey: "appointments", color: "#2563eb", name: "Appointments" },
+                  { dataKey: "revenue", color: "#8b5cf6", name: "Revenue ($100s)" },
+                ]}
+                height={200}
+              />
+            ) : (
+              <div className="h-[200px] flex items-center justify-center text-slate-500">
+                No data available
+              </div>
+            )}
+          </ChartCard>
+          <ChartCard title="Revenue Growth">
+            {monthlyData.length > 0 ? (
+              <SimpleAreaChart
+                data={monthlyData}
+                dataKey="revenue"
+                color="#10b981"
+                height={200}
+              />
+            ) : (
+              <div className="h-[200px] flex items-center justify-center text-slate-500">
+                No data available
+              </div>
+            )}
+          </ChartCard>
         </div>
 
         {/* Charts Row 1 */}

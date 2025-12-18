@@ -19,7 +19,10 @@ import {
   ChevronRight,
   Loader2,
   AlertCircle,
+  Activity,
+  FlaskConical,
 } from "lucide-react";
+import { ChartCard, SimpleBarChart, Sparkline } from "@/components/dashboard/Charts";
 
 interface Appointment {
   id: number;
@@ -40,6 +43,11 @@ interface RecentPatient {
   status: string;
 }
 
+interface WeeklyData {
+  day: string;
+  appointments: number;
+}
+
 interface DashboardData {
   stats: {
     todayAppointments: number;
@@ -49,6 +57,8 @@ interface DashboardData {
   };
   todaySchedule: Appointment[];
   recentPatients: RecentPatient[];
+  weeklyStats?: WeeklyData[];
+  appointmentTrend?: number[];
 }
 
 export default function DoctorDashboard() {
@@ -350,7 +360,7 @@ export default function DoctorDashboard() {
             <CardTitle>Quick Actions</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
               <Link href="/doctor/prescriptions">
                 <Button variant="outline" className="h-auto py-4 flex-col gap-2 w-full">
                   <FileText className="h-6 w-6 text-blue-600" />
@@ -369,6 +379,18 @@ export default function DoctorDashboard() {
                   <span>View Patients</span>
                 </Button>
               </Link>
+              <Link href="/doctor/lab-tests">
+                <Button variant="outline" className="h-auto py-4 flex-col gap-2 w-full">
+                  <FlaskConical className="h-6 w-6 text-pink-600" />
+                  <span>Lab Tests</span>
+                </Button>
+              </Link>
+              <Link href="/doctor/vitals">
+                <Button variant="outline" className="h-auto py-4 flex-col gap-2 w-full">
+                  <Activity className="h-6 w-6 text-red-600" />
+                  <span>Vital Signs</span>
+                </Button>
+              </Link>
               <Link href="/doctor/schedule">
                 <Button variant="outline" className="h-auto py-4 flex-col gap-2 w-full">
                   <Clock className="h-6 w-6 text-amber-600" />
@@ -378,6 +400,48 @@ export default function DoctorDashboard() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Weekly Analytics */}
+        {data?.weeklyStats && data.weeklyStats.length > 0 && (
+          <div className="mt-6">
+            <ChartCard title="This Week's Appointments">
+              <SimpleBarChart
+                data={data.weeklyStats}
+                dataKey="appointments"
+                color="#2563eb"
+                height={200}
+              />
+            </ChartCard>
+          </div>
+        )}
+
+        {/* Mini Trend Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm font-medium text-slate-600">Appointment Trend</p>
+                <Badge variant="success" size="sm">+12%</Badge>
+              </div>
+              {data?.appointmentTrend && data.appointmentTrend.length > 0 ? (
+                <Sparkline data={data.appointmentTrend} color="#10b981" height={60} />
+              ) : (
+                <Sparkline data={[3, 5, 4, 6, 8, 7, 9]} color="#10b981" height={60} />
+              )}
+              <p className="text-xs text-slate-500 mt-2">Last 7 days</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm font-medium text-slate-600">Patient Growth</p>
+                <Badge variant="primary" size="sm">+{data?.stats.totalPatients || 0}</Badge>
+              </div>
+              <Sparkline data={[2, 4, 3, 5, 7, 6, 8]} color="#2563eb" height={60} />
+              <p className="text-xs text-slate-500 mt-2">Active patients this month</p>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );
