@@ -5,6 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { cn } from "@/lib/utils";
+import { CurrencyProvider } from "@/contexts/CurrencyContext";
 
 export default function DashboardLayout({
   children,
@@ -49,16 +50,18 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <Sidebar />
-      <main
-        className={cn(
-          "transition-all duration-300",
-          sidebarCollapsed ? "ml-20" : "ml-64"
-        )}
-      >
-        {children}
-      </main>
-    </div>
+    <CurrencyProvider>
+      <div className="min-h-screen bg-slate-50">
+        <Sidebar />
+        <main
+          className={cn(
+            "transition-all duration-300",
+            sidebarCollapsed ? "ml-20" : "ml-64"
+          )}
+        >
+          {children}
+        </main>
+      </div>
+    </CurrencyProvider>
   );
 }

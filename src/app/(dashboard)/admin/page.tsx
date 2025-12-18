@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { Header } from "@/components/dashboard/Header";
 import { StatsCard } from "@/components/dashboard/StatsCard";
+import { useCurrency } from "@/contexts/CurrencyContext";
 import {
   ChartCard,
   SimpleAreaChart,
@@ -73,6 +74,7 @@ interface DepartmentStats {
 
 export default function AdminDashboard() {
   const { data: session } = useSession();
+  const { formatCurrency } = useCurrency();
   const [stats, setStats] = useState<Stats | null>(null);
   const [recentAppointments, setRecentAppointments] = useState<Appointment[]>([]);
   const [topDoctors, setTopDoctors] = useState<Doctor[]>([]);
@@ -211,7 +213,7 @@ export default function AdminDashboard() {
           />
           <StatsCard
             title="Revenue (Monthly)"
-            value={`$${(stats?.monthlyRevenue || 0).toLocaleString()}`}
+            value={formatCurrency(stats?.monthlyRevenue || 0)}
             icon={<DollarSign className="h-6 w-6" />}
             trend={{ value: 15.3, isPositive: true }}
             iconColor="text-violet-600"

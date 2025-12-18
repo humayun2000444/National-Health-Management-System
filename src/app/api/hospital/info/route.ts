@@ -45,6 +45,7 @@ export async function GET() {
         slug: true,
         logo: true,
         primaryColor: true,
+        settings: true,
       },
     });
 
@@ -52,7 +53,18 @@ export async function GET() {
       return NextResponse.json({ error: "Hospital not found" }, { status: 404 });
     }
 
-    return NextResponse.json(hospital);
+    // Parse settings and ensure currency is included
+    const settings = hospital.settings as Record<string, unknown> || {};
+
+    return NextResponse.json({
+      ...hospital,
+      settings: {
+        ...settings,
+        currency: settings.currency || "USD",
+        timezone: settings.timezone || "UTC",
+        dateFormat: settings.dateFormat || "MM/DD/YYYY",
+      },
+    });
   } catch (error) {
     console.error("Error fetching hospital info:", error);
     return NextResponse.json(

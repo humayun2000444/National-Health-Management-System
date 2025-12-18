@@ -5,6 +5,7 @@ import { Header } from "@/components/dashboard/Header";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Select } from "@/components/ui/Select";
+import { useCurrency } from "@/contexts/CurrencyContext";
 import {
   ChartCard,
   SimpleLineChart,
@@ -55,6 +56,7 @@ const periodOptions = [
 ];
 
 export default function ReportsPage() {
+  const { formatCurrency } = useCurrency();
   const [period, setPeriod] = useState("30d");
   const [data, setData] = useState<ReportData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -78,15 +80,6 @@ export default function ReportsPage() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(value);
   };
 
   const formatChange = (change: string) => {

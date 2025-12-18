@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/Input";
 import { Badge } from "@/components/ui/Badge";
 import { Modal, ModalFooter } from "@/components/ui/Modal";
 import { Select } from "@/components/ui/Select";
+import { useCurrency } from "@/contexts/CurrencyContext";
 import {
   Plus,
   Search,
@@ -128,6 +129,7 @@ const initialPaymentForm: PaymentFormData = {
 };
 
 export default function BillingPage() {
+  const { formatCurrency } = useCurrency();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [stats, setStats] = useState<Stats>({
     totalRevenue: 0,
@@ -364,13 +366,6 @@ export default function BillingPage() {
       default:
         return "secondary";
     }
-  };
-
-  const formatCurrency = (amount: number): string => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(amount);
   };
 
   const columns: Column<Invoice>[] = [

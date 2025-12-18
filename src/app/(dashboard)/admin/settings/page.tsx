@@ -19,7 +19,11 @@ import {
   CheckCircle,
   AlertCircle,
   Trash2,
+  Globe,
+  DollarSign,
 } from "lucide-react";
+import { Select } from "@/components/ui/Select";
+import { currencies, getCurrency, formatCurrency } from "@/lib/currency";
 
 interface HospitalSettings {
   id: string;
@@ -42,6 +46,9 @@ interface HospitalSettings {
     emailNotifications: boolean;
     appointmentReminder: number;
     replyToEmail: string;
+    currency: string;
+    timezone: string;
+    dateFormat: string;
   };
 }
 
@@ -86,6 +93,11 @@ export default function SettingsPage() {
   const [appointmentReminder, setAppointmentReminder] = useState(24);
   const [replyToEmail, setReplyToEmail] = useState("");
 
+  // Regional settings
+  const [currency, setCurrency] = useState("USD");
+  const [timezone, setTimezone] = useState("UTC");
+  const [dateFormat, setDateFormat] = useState("MM/DD/YYYY");
+
   // Subscription
   const [subscription, setSubscription] = useState("free");
 
@@ -127,6 +139,9 @@ export default function SettingsPage() {
         });
         setAppointmentReminder(data.settings.appointmentReminder ?? 24);
         setReplyToEmail(data.settings.replyToEmail ?? "");
+        setCurrency(data.settings.currency ?? "USD");
+        setTimezone(data.settings.timezone ?? "UTC");
+        setDateFormat(data.settings.dateFormat ?? "MM/DD/YYYY");
       }
     } catch (err) {
       setError("Failed to load settings");
@@ -235,6 +250,21 @@ export default function SettingsPage() {
               ...features,
               appointmentReminder,
               replyToEmail,
+              currency,
+              timezone,
+              dateFormat,
+            },
+          };
+          break;
+        case "regional":
+          updateData = {
+            settings: {
+              ...features,
+              appointmentReminder,
+              replyToEmail,
+              currency,
+              timezone,
+              dateFormat,
             },
           };
           break;
@@ -260,6 +290,7 @@ export default function SettingsPage() {
 
   const tabs = [
     { id: "general", label: "General", icon: <Building2 className="h-4 w-4" /> },
+    { id: "regional", label: "Regional", icon: <Globe className="h-4 w-4" /> },
     { id: "branding", label: "Branding", icon: <Palette className="h-4 w-4" /> },
     { id: "features", label: "Features", icon: <Shield className="h-4 w-4" /> },
     { id: "notifications", label: "Notifications", icon: <Bell className="h-4 w-4" /> },
@@ -446,6 +477,145 @@ export default function SettingsPage() {
 
                     <div className="flex justify-end">
                       <Button onClick={() => handleSave("general")} isLoading={isSaving}>
+                        <Save className="h-4 w-4 mr-2" />
+                        Save Changes
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Regional Settings */}
+            {activeTab === "regional" && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Regional Settings</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-6">
+                    <p className="text-slate-500">
+                      Configure currency, timezone, and date format for your hospital.
+                    </p>
+
+                    {/* Currency Selection */}
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        <div className="flex items-center gap-2">
+                          <DollarSign className="h-4 w-4" />
+                          Currency
+                        </div>
+                      </label>
+                      <Select
+                        options={currencies.map((c) => ({
+                          value: c.code,
+                          label: `${c.symbol} - ${c.name} (${c.code})`,
+                        }))}
+                        value={currency}
+                        onChange={(e) => setCurrency(e.target.value)}
+                      />
+                      <p className="text-xs text-slate-500 mt-1">
+                        This currency will be used across all billing, invoices, and financial reports.
+                      </p>
+                    </div>
+
+                    {/* Currency Preview */}
+                    <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
+                      <p className="text-sm font-medium text-slate-700 mb-3">Currency Preview</p>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div className="text-center p-3 bg-white rounded-lg border border-slate-100">
+                          <p className="text-xs text-slate-500">Small Amount</p>
+                          <p className="text-lg font-semibold text-slate-900">
+                            {formatCurrency(25.50, currency)}
+                          </p>
+                        </div>
+                        <div className="text-center p-3 bg-white rounded-lg border border-slate-100">
+                          <p className="text-xs text-slate-500">Standard Amount</p>
+                          <p className="text-lg font-semibold text-slate-900">
+                            {formatCurrency(1250.00, currency)}
+                          </p>
+                        </div>
+                        <div className="text-center p-3 bg-white rounded-lg border border-slate-100">
+                          <p className="text-xs text-slate-500">Large Amount</p>
+                          <p className="text-lg font-semibold text-slate-900">
+                            {formatCurrency(45000, currency)}
+                          </p>
+                        </div>
+                        <div className="text-center p-3 bg-white rounded-lg border border-slate-100">
+                          <p className="text-xs text-slate-500">Compact</p>
+                          <p className="text-lg font-semibold text-slate-900">
+                            {formatCurrency(1250000, currency, { compact: true })}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Timezone Selection */}
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Timezone
+                      </label>
+                      <Select
+                        options={[
+                          { value: "UTC", label: "UTC (Coordinated Universal Time)" },
+                          { value: "America/New_York", label: "Eastern Time (US/Canada)" },
+                          { value: "America/Chicago", label: "Central Time (US/Canada)" },
+                          { value: "America/Denver", label: "Mountain Time (US/Canada)" },
+                          { value: "America/Los_Angeles", label: "Pacific Time (US/Canada)" },
+                          { value: "America/Sao_Paulo", label: "Sao Paulo (BRT)" },
+                          { value: "Europe/London", label: "London (GMT/BST)" },
+                          { value: "Europe/Paris", label: "Paris (CET/CEST)" },
+                          { value: "Europe/Berlin", label: "Berlin (CET/CEST)" },
+                          { value: "Europe/Moscow", label: "Moscow (MSK)" },
+                          { value: "Africa/Cairo", label: "Cairo (EET)" },
+                          { value: "Africa/Lagos", label: "Lagos (WAT)" },
+                          { value: "Africa/Johannesburg", label: "Johannesburg (SAST)" },
+                          { value: "Asia/Dubai", label: "Dubai (GST)" },
+                          { value: "Asia/Riyadh", label: "Riyadh (AST)" },
+                          { value: "Asia/Karachi", label: "Karachi (PKT)" },
+                          { value: "Asia/Dhaka", label: "Dhaka, Bangladesh (BST)" },
+                          { value: "Asia/Kolkata", label: "India (IST)" },
+                          { value: "Asia/Colombo", label: "Colombo (IST)" },
+                          { value: "Asia/Bangkok", label: "Bangkok (ICT)" },
+                          { value: "Asia/Jakarta", label: "Jakarta (WIB)" },
+                          { value: "Asia/Singapore", label: "Singapore (SGT)" },
+                          { value: "Asia/Kuala_Lumpur", label: "Kuala Lumpur (MYT)" },
+                          { value: "Asia/Manila", label: "Manila (PHT)" },
+                          { value: "Asia/Hong_Kong", label: "Hong Kong (HKT)" },
+                          { value: "Asia/Shanghai", label: "Shanghai (CST)" },
+                          { value: "Asia/Taipei", label: "Taipei (CST)" },
+                          { value: "Asia/Seoul", label: "Seoul (KST)" },
+                          { value: "Asia/Tokyo", label: "Tokyo (JST)" },
+                          { value: "Australia/Perth", label: "Perth (AWST)" },
+                          { value: "Australia/Sydney", label: "Sydney (AEST/AEDT)" },
+                          { value: "Australia/Melbourne", label: "Melbourne (AEST/AEDT)" },
+                          { value: "Pacific/Auckland", label: "Auckland (NZST/NZDT)" },
+                        ]}
+                        value={timezone}
+                        onChange={(e) => setTimezone(e.target.value)}
+                      />
+                    </div>
+
+                    {/* Date Format Selection */}
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Date Format
+                      </label>
+                      <Select
+                        options={[
+                          { value: "MM/DD/YYYY", label: "MM/DD/YYYY (12/31/2024)" },
+                          { value: "DD/MM/YYYY", label: "DD/MM/YYYY (31/12/2024)" },
+                          { value: "YYYY-MM-DD", label: "YYYY-MM-DD (2024-12-31)" },
+                          { value: "DD-MM-YYYY", label: "DD-MM-YYYY (31-12-2024)" },
+                          { value: "DD.MM.YYYY", label: "DD.MM.YYYY (31.12.2024)" },
+                        ]}
+                        value={dateFormat}
+                        onChange={(e) => setDateFormat(e.target.value)}
+                      />
+                    </div>
+
+                    <div className="flex justify-end pt-4">
+                      <Button onClick={() => handleSave("regional")} isLoading={isSaving}>
                         <Save className="h-4 w-4 mr-2" />
                         Save Changes
                       </Button>
