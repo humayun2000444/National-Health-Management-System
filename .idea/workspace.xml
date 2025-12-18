@@ -6,23 +6,11 @@
   <component name="ChangeListManager">
     <list default="true" id="a52fd2f1-74f9-4a31-b1cc-41437c568a86" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(auth)/login/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(auth)/login/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(dashboard)/admin/appointments/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(dashboard)/admin/appointments/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(dashboard)/admin/departments/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(dashboard)/admin/departments/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(dashboard)/admin/doctors/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(dashboard)/admin/doctors/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(dashboard)/admin/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(dashboard)/admin/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(dashboard)/admin/patients/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(dashboard)/admin/patients/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(dashboard)/admin/reports/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(dashboard)/admin/reports/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(dashboard)/admin/settings/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(dashboard)/admin/settings/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(dashboard)/patient/appointments/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(dashboard)/patient/appointments/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(dashboard)/patient/book/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(dashboard)/patient/book/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(dashboard)/patient/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(dashboard)/patient/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(dashboard)/patient/prescriptions/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(dashboard)/patient/prescriptions/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(dashboard)/patient/profile/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(dashboard)/patient/profile/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(dashboard)/patient/records/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(dashboard)/patient/records/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/(marketing)/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(marketing)/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/dashboard/Sidebar.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/dashboard/Sidebar.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(dashboard)/doctor/appointments/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(dashboard)/doctor/appointments/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(dashboard)/doctor/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(dashboard)/doctor/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(dashboard)/doctor/patients/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(dashboard)/doctor/patients/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(dashboard)/doctor/prescriptions/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(dashboard)/doctor/prescriptions/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/(dashboard)/doctor/records/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/(dashboard)/doctor/records/page.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -30,42 +18,64 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="EmbeddingIndexingInfo">
-    <option name="cachedIndexableFilesCount" value="550" />
+    <option name="cachedIndexableFilesCount" value="93" />
     <option name="fileBasedEmbeddingIndicesEnabled" value="true" />
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 2
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 2
+}</component>
   <component name="ProjectId" id="36uw65yzRXko7kHcaW5A6YgMl59" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "git-widget-placeholder": "main",
-    "javascript.preferred.runtime.type.id": "node",
-    "junie.onboarding.icon.badge.shown": "true",
-    "last_opened_file_path": "D:/National-Health-Management-System",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "to.speed.mode.migration.done": "true",
-    "ts.external.directory.path": "D:\\National-Health-Management-System\\node_modules\\typescript\\lib",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;javascript.preferred.runtime.type.id&quot;: &quot;node&quot;,
+    &quot;js.debugger.nextJs.config.created.client&quot;: &quot;true&quot;,
+    &quot;js.debugger.nextJs.config.created.server&quot;: &quot;true&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;D:/National-Health-Management-System&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;D:\\National-Health-Management-System\\node_modules\\typescript\\lib&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\National-Health-Management-System\database\backups" />
+    </key>
+  </component>
+  <component name="RunManager" selected="npm.Next.js: server-side">
+    <configuration name="Next.js: debug client-side" type="JavascriptDebugType" uri="http://localhost:3000/">
+      <method v="2" />
+    </configuration>
+    <configuration name="Next.js: server-side" type="js.build_tools.npm">
+      <package-json value="$PROJECT_DIR$/package.json" />
+      <command value="run" />
+      <scripts>
+        <script value="dev" />
+      </scripts>
+      <node-interpreter value="project" />
+      <envs />
+      <method v="2" />
+    </configuration>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -80,7 +90,9 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1765869585542</updated>
-      <workItem from="1765869587147" duration="17847000" />
+      <workItem from="1765869587147" duration="17946000" />
+      <workItem from="1766014133324" duration="117000" />
+      <workItem from="1766059532262" duration="840000" />
     </task>
     <servers />
   </component>
