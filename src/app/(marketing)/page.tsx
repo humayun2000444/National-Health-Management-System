@@ -12,7 +12,6 @@ import {
   Check,
   ArrowRight,
   Star,
-  Building2,
   Stethoscope,
   Clock,
   Globe,
@@ -22,19 +21,22 @@ import {
   Play,
   Phone,
   Mail,
-  MapPin,
   Twitter,
   Linkedin,
   Facebook,
-  Instagram,
   Menu,
   X,
   Award,
   TrendingUp,
   Headphones,
   CheckCircle2,
-  ArrowUpRight,
   Sparkles,
+  Pill,
+  TestTube,
+  Activity,
+  CreditCard,
+  AlertTriangle,
+  Building2,
 } from "lucide-react";
 
 // Animated counter hook
@@ -60,74 +62,92 @@ function useCounter(end: number, duration: number = 2000) {
 const features = [
   {
     icon: <Calendar className="h-6 w-6" />,
-    title: "Smart Scheduling",
+    title: "Appointment Management",
     description:
-      "AI-powered appointment booking with intelligent scheduling that reduces wait times by 60% and eliminates double-booking.",
+      "Smart scheduling system with automated reminders, real-time availability tracking, and multi-doctor support.",
     gradient: "from-blue-500 to-cyan-500",
   },
   {
-    icon: <FileText className="h-6 w-6" />,
-    title: "Digital Health Records",
+    icon: <Pill className="h-6 w-6" />,
+    title: "Digital Prescriptions",
     description:
-      "Secure EHR/EMR system with instant access to complete patient history, lab results, and imaging from anywhere.",
+      "Create and manage prescriptions with drug interaction warnings, dosage tracking, and printable formats.",
     gradient: "from-violet-500 to-purple-500",
   },
   {
-    icon: <Users className="h-6 w-6" />,
-    title: "Patient Portal",
+    icon: <TestTube className="h-6 w-6" />,
+    title: "Lab Test Management",
     description:
-      "Self-service portal for appointment booking, prescription refills, telemedicine, and health tracking.",
+      "Order lab tests, track results, and view comprehensive test history with automated notifications.",
     gradient: "from-emerald-500 to-teal-500",
   },
   {
-    icon: <BarChart3 className="h-6 w-6" />,
-    title: "Real-time Analytics",
+    icon: <Activity className="h-6 w-6" />,
+    title: "Vital Signs Tracking",
     description:
-      "Comprehensive dashboards with KPIs, revenue tracking, patient satisfaction metrics, and predictive insights.",
-    gradient: "from-orange-500 to-amber-500",
-  },
-  {
-    icon: <Shield className="h-6 w-6" />,
-    title: "Enterprise Security",
-    description:
-      "HIPAA, GDPR, and SOC 2 compliant with end-to-end encryption, audit trails, and role-based access control.",
+      "Monitor patient vitals including blood pressure, heart rate, temperature, and oxygen levels with trend charts.",
     gradient: "from-rose-500 to-pink-500",
   },
   {
-    icon: <Globe className="h-6 w-6" />,
-    title: "Multi-Location Support",
+    icon: <CreditCard className="h-6 w-6" />,
+    title: "Billing & Invoicing",
     description:
-      "Manage multiple facilities, departments, and branches from a single unified platform with location-based settings.",
+      "Complete billing system with invoice generation, payment tracking, and multi-currency support.",
+    gradient: "from-orange-500 to-amber-500",
+  },
+  {
+    icon: <AlertTriangle className="h-6 w-6" />,
+    title: "Emergency Triage",
+    description:
+      "Priority-based emergency management with real-time queue tracking and critical patient alerts.",
+    gradient: "from-red-500 to-rose-500",
+  },
+  {
+    icon: <FileText className="h-6 w-6" />,
+    title: "Medical Records",
+    description:
+      "Secure electronic health records with complete patient history, diagnoses, and treatment plans.",
     gradient: "from-indigo-500 to-blue-500",
+  },
+  {
+    icon: <BarChart3 className="h-6 w-6" />,
+    title: "Analytics & Reports",
+    description:
+      "Comprehensive dashboards with revenue tracking, appointment analytics, and performance insights.",
+    gradient: "from-cyan-500 to-teal-500",
+  },
+  {
+    icon: <Shield className="h-6 w-6" />,
+    title: "Audit Logs & Security",
+    description:
+      "Complete audit trail with role-based access control, activity logging, and data protection.",
+    gradient: "from-slate-500 to-zinc-500",
   },
 ];
 
 const testimonials = [
   {
     quote:
-      "HealthCare Pro has revolutionized our hospital operations. We've seen a 45% reduction in administrative workload and patient satisfaction scores have never been higher.",
-    author: "Dr. Sarah Wilson",
-    role: "Chief Medical Officer",
-    hospital: "Johns Hopkins Medicine",
-    image: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=100&h=100&fit=crop&crop=face",
+      "NHMS has transformed how we manage our hospital. The integrated billing and prescription system saves us hours every day.",
+    author: "Dr. Rahman Ahmed",
+    role: "Medical Director",
+    hospital: "City General Hospital",
     rating: 5,
   },
   {
     quote:
-      "The ROI was immediate. Within 3 months, we recovered our investment through improved efficiency and reduced no-shows. The analytics alone are worth the subscription.",
-    author: "James Rodriguez",
+      "The emergency triage feature is a lifesaver. We can now prioritize critical patients instantly and track their status in real-time.",
+    author: "Dr. Fatima Khan",
+    role: "Emergency Department Head",
+    hospital: "National Medical Center",
+    rating: 5,
+  },
+  {
+    quote:
+      "Finally, a system that doctors and staff actually want to use. The interface is intuitive and the multi-currency billing is perfect for our needs.",
+    author: "Mohammad Hassan",
     role: "Hospital Administrator",
-    hospital: "Mayo Clinic",
-    image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face",
-    rating: 5,
-  },
-  {
-    quote:
-      "Finally, a system that doctors actually want to use. The interface is intuitive, the mobile app is fantastic, and the support team is incredibly responsive.",
-    author: "Dr. Emily Chen",
-    role: "Head of Cardiology",
-    hospital: "Cleveland Clinic",
-    image: "https://images.unsplash.com/photo-1594824476967-48c8b964273f?w=100&h=100&fit=crop&crop=face",
+    hospital: "Metropolitan Healthcare",
     rating: 5,
   },
 ];
@@ -135,36 +155,35 @@ const testimonials = [
 const pricingPlans = [
   {
     name: "Starter",
-    price: "299",
-    period: "month",
-    description: "Perfect for small clinics and private practices",
+    price: "Free",
+    period: "",
+    description: "Perfect for small clinics getting started",
     features: [
-      "Up to 5 healthcare providers",
-      "500 patient records",
+      "Up to 3 doctors",
+      "100 patient records",
       "Basic appointment scheduling",
-      "Patient portal access",
+      "Digital prescriptions",
       "Email support",
-      "Basic analytics dashboard",
-      "Mobile app access",
+      "Basic analytics",
     ],
-    cta: "Start Free Trial",
+    cta: "Get Started Free",
     popular: false,
   },
   {
     name: "Professional",
-    price: "799",
+    price: "49",
     period: "month",
     description: "For growing hospitals and medical centers",
     features: [
-      "Up to 50 healthcare providers",
+      "Unlimited doctors",
       "Unlimited patient records",
       "Advanced scheduling & reminders",
-      "Digital prescriptions",
-      "Priority 24/7 support",
-      "Advanced analytics & reports",
-      "Custom branding",
-      "API access",
-      "Telemedicine integration",
+      "Lab test management",
+      "Vital signs tracking",
+      "Billing & invoicing",
+      "Priority support",
+      "Advanced analytics",
+      "Multi-currency support",
     ],
     cta: "Start Free Trial",
     popular: true,
@@ -173,52 +192,47 @@ const pricingPlans = [
     name: "Enterprise",
     price: "Custom",
     period: "",
-    description: "For large healthcare networks and hospital chains",
+    description: "For large healthcare networks",
     features: [
-      "Unlimited providers & locations",
-      "Unlimited everything",
+      "Everything in Professional",
+      "Multi-location support",
+      "Emergency triage system",
       "Custom integrations",
       "Dedicated account manager",
-      "On-premise deployment option",
+      "On-premise deployment",
       "Custom SLA guarantee",
       "Staff training included",
-      "HIPAA BAA agreement",
-      "Custom feature development",
     ],
     cta: "Contact Sales",
     popular: false,
   },
 ];
 
-const partners = [
-  "Microsoft Healthcare",
-  "Google Cloud",
-  "AWS Healthcare",
-  "Epic Systems",
-  "Cerner",
-  "Philips Healthcare",
-];
-
 const faqs = [
   {
-    question: "How long does implementation take?",
+    question: "How long does it take to set up NHMS?",
     answer:
-      "Most clinics are up and running within 2-4 weeks. Enterprise implementations typically take 6-12 weeks depending on complexity and integration requirements.",
+      "Most clinics are up and running within a few hours. Simply create an account, add your doctors and departments, and you're ready to start managing patients.",
   },
   {
-    question: "Is my data secure and HIPAA compliant?",
+    question: "Is my patient data secure?",
     answer:
-      "Absolutely. We maintain HIPAA, GDPR, and SOC 2 Type II compliance. All data is encrypted at rest and in transit with 256-bit AES encryption.",
+      "Absolutely. We use industry-standard encryption for all data at rest and in transit. Our system includes complete audit logs and role-based access control.",
   },
   {
-    question: "Can I migrate data from my existing system?",
+    question: "Can I customize the system for my hospital?",
     answer:
-      "Yes, we provide free data migration services for all plans. Our team will help transfer your patient records, appointments, and other data securely.",
+      "Yes! NHMS supports custom branding, configurable currencies, timezones, and date formats. Enterprise plans include custom feature development.",
   },
   {
-    question: "Do you offer training for staff?",
+    question: "Do you support multiple currencies?",
     answer:
-      "Yes, all plans include access to our online training resources. Professional and Enterprise plans include live training sessions and ongoing support.",
+      "Yes, we support 25+ currencies including USD, EUR, GBP, BDT, INR, and many more. Admins can change the currency from settings anytime.",
+  },
+  {
+    question: "What about training and support?",
+    answer:
+      "All plans include access to our documentation and email support. Professional and Enterprise plans include priority support and live training sessions.",
   },
 ];
 
@@ -226,10 +240,10 @@ export default function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
-  const stat1 = useCounter(500, 2000);
-  const stat2 = useCounter(2, 2000);
+  const stat1 = useCounter(1000, 2000);
+  const stat2 = useCounter(50, 2000);
   const stat3 = useCounter(99, 2000);
-  const stat4 = useCounter(45, 2000);
+  const stat4 = useCounter(24, 2000);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -260,12 +274,15 @@ export default function LandingPage() {
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-xl blur-lg opacity-50" />
                 <div className="relative bg-gradient-to-r from-blue-600 to-cyan-500 p-2.5 rounded-xl">
-                  <Heart className="h-6 w-6 text-white" />
+                  <Building2 className="h-6 w-6 text-white" />
                 </div>
               </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
-                HealthCare Pro
-              </span>
+              <div>
+                <span className="text-xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
+                  NHMS
+                </span>
+                <span className="hidden sm:block text-xs text-slate-500">National Health Management</span>
+              </div>
             </div>
 
             {/* Desktop Navigation */}
@@ -337,16 +354,16 @@ export default function LandingPage() {
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-100 rounded-full text-blue-700 text-sm font-medium mb-8 shadow-sm">
               <Sparkles className="h-4 w-4" />
-              <span>Trusted by 500+ Healthcare Providers Worldwide</span>
+              <span>Complete Hospital Management Solution</span>
               <ChevronRight className="h-4 w-4" />
             </div>
 
             {/* Headline */}
             <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold text-slate-900 leading-[1.1] mb-6 tracking-tight">
-              The Future of{" "}
+              National Health{" "}
               <span className="relative">
                 <span className="relative z-10 bg-gradient-to-r from-blue-600 via-cyan-500 to-teal-500 bg-clip-text text-transparent">
-                  Healthcare
+                  Management
                 </span>
                 <svg className="absolute -bottom-2 left-0 w-full" viewBox="0 0 300 12" fill="none">
                   <path d="M2 10C50 4 150 4 298 10" stroke="url(#gradient)" strokeWidth="4" strokeLinecap="round"/>
@@ -359,14 +376,13 @@ export default function LandingPage() {
                 </svg>
               </span>
               <br />
-              Management is Here
+              System
             </h1>
 
             {/* Subheadline */}
             <p className="text-lg sm:text-xl text-slate-600 mb-10 max-w-2xl mx-auto leading-relaxed">
-              Streamline operations, enhance patient care, and scale your healthcare
-              business with our AI-powered hospital management platform trusted by
-              leading medical institutions.
+              A complete hospital management platform with appointments, prescriptions,
+              billing, lab tests, vital signs tracking, and emergency triage - all in one place.
             </p>
 
             {/* CTA Buttons */}
@@ -375,28 +391,28 @@ export default function LandingPage() {
                 href="/login"
                 className="group w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-semibold rounded-full hover:shadow-xl hover:shadow-blue-500/25 transition-all duration-300 flex items-center justify-center gap-2"
               >
-                Start Free 14-Day Trial
+                Start Managing Your Hospital
                 <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </Link>
-              <button className="group w-full sm:w-auto px-8 py-4 bg-white text-slate-900 font-semibold rounded-full border border-slate-200 hover:border-slate-300 hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2">
+              <a href="#features" className="group w-full sm:w-auto px-8 py-4 bg-white text-slate-900 font-semibold rounded-full border border-slate-200 hover:border-slate-300 hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2">
                 <Play className="h-5 w-5 text-blue-600" />
-                Watch Demo
-              </button>
+                Explore Features
+              </a>
             </div>
 
             {/* Trust Indicators */}
             <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-slate-500">
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="h-5 w-5 text-emerald-500" />
-                <span>No credit card required</span>
+                <span>Free to get started</span>
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="h-5 w-5 text-emerald-500" />
-                <span>Free data migration</span>
+                <span>Multi-currency support</span>
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="h-5 w-5 text-emerald-500" />
-                <span>Cancel anytime</span>
+                <span>Role-based access</span>
               </div>
             </div>
           </div>
@@ -409,11 +425,11 @@ export default function LandingPage() {
             <div className="absolute -left-4 top-1/4 bg-white rounded-2xl shadow-xl p-4 hidden lg:block animate-bounce z-10" style={{ animationDuration: "3s" }}>
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center">
-                  <TrendingUp className="h-5 w-5 text-emerald-600" />
+                  <Activity className="h-5 w-5 text-emerald-600" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-slate-900">+45%</p>
-                  <p className="text-xs text-slate-500">Efficiency</p>
+                  <p className="text-sm font-semibold text-slate-900">Vitals OK</p>
+                  <p className="text-xs text-slate-500">All normal</p>
                 </div>
               </div>
             </div>
@@ -421,11 +437,11 @@ export default function LandingPage() {
             <div className="absolute -right-4 top-1/3 bg-white rounded-2xl shadow-xl p-4 hidden lg:block animate-bounce z-10" style={{ animationDuration: "4s", animationDelay: "0.5s" }}>
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                  <Users className="h-5 w-5 text-blue-600" />
+                  <Calendar className="h-5 w-5 text-blue-600" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-slate-900">2M+</p>
-                  <p className="text-xs text-slate-500">Patients</p>
+                  <p className="text-sm font-semibold text-slate-900">12 Today</p>
+                  <p className="text-xs text-slate-500">Appointments</p>
                 </div>
               </div>
             </div>
@@ -443,7 +459,7 @@ export default function LandingPage() {
                   <div className="flex-1 mx-4">
                     <div className="bg-slate-600/50 rounded-lg px-4 py-1.5 text-xs text-slate-400 flex items-center gap-2">
                       <Lock className="h-3 w-3" />
-                      app.healthcarepro.com/dashboard
+                      nhms.app/admin/dashboard
                     </div>
                   </div>
                 </div>
@@ -455,12 +471,12 @@ export default function LandingPage() {
                     <div className="col-span-1 bg-white rounded-xl shadow-sm p-4 hidden lg:block">
                       <div className="flex items-center gap-2 mb-6">
                         <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-lg flex items-center justify-center">
-                          <Heart className="h-4 w-4 text-white" />
+                          <Building2 className="h-4 w-4 text-white" />
                         </div>
-                        <span className="font-semibold text-slate-900 text-sm">HealthCare Pro</span>
+                        <span className="font-semibold text-slate-900 text-sm">NHMS</span>
                       </div>
                       <div className="space-y-2">
-                        {["Dashboard", "Appointments", "Patients", "Doctors", "Reports"].map((item, i) => (
+                        {["Dashboard", "Appointments", "Patients", "Doctors", "Billing", "Lab Tests", "Emergency"].map((item, i) => (
                           <div key={i} className={`px-3 py-2 rounded-lg text-xs ${i === 0 ? "bg-blue-50 text-blue-600 font-medium" : "text-slate-600"}`}>
                             {item}
                           </div>
@@ -475,13 +491,13 @@ export default function LandingPage() {
                         {[
                           { label: "Total Patients", value: "2,847", color: "blue", trend: "+12%" },
                           { label: "Appointments", value: "145", color: "emerald", trend: "+8%" },
-                          { label: "Revenue", value: "$72.4K", color: "violet", trend: "+23%" },
-                          { label: "Satisfaction", value: "98%", color: "amber", trend: "+5%" },
+                          { label: "Revenue", value: "72.4K BDT", color: "violet", trend: "+23%" },
+                          { label: "Lab Tests", value: "89", color: "amber", trend: "+15%" },
                         ].map((stat, i) => (
                           <div key={i} className="bg-white rounded-xl p-3 lg:p-4 shadow-sm">
                             <p className="text-xs text-slate-500 mb-1">{stat.label}</p>
                             <p className="text-lg lg:text-xl font-bold text-slate-900">{stat.value}</p>
-                            <p className={`text-xs text-emerald-600 font-medium`}>{stat.trend}</p>
+                            <p className="text-xs text-emerald-600 font-medium">{stat.trend}</p>
                           </div>
                         ))}
                       </div>
@@ -510,13 +526,22 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Partners Section */}
+      {/* Features Highlight */}
       <section className="py-12 bg-slate-50 border-y border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <p className="text-center text-sm text-slate-500 mb-8">Trusted by healthcare leaders worldwide</p>
-          <div className="flex flex-wrap items-center justify-center gap-8 lg:gap-16 opacity-60">
-            {partners.map((partner, i) => (
-              <div key={i} className="text-slate-400 font-semibold text-lg">{partner}</div>
+          <div className="flex flex-wrap items-center justify-center gap-8 lg:gap-16">
+            {[
+              { icon: <Stethoscope className="h-5 w-5" />, text: "Doctor Portal" },
+              { icon: <Users className="h-5 w-5" />, text: "Patient Portal" },
+              { icon: <CreditCard className="h-5 w-5" />, text: "Billing System" },
+              { icon: <TestTube className="h-5 w-5" />, text: "Lab Management" },
+              { icon: <Activity className="h-5 w-5" />, text: "Vital Signs" },
+              { icon: <AlertTriangle className="h-5 w-5" />, text: "Emergency Triage" },
+            ].map((item, i) => (
+              <div key={i} className="flex items-center gap-2 text-slate-600">
+                <div className="text-blue-600">{item.icon}</div>
+                <span className="font-medium">{item.text}</span>
+              </div>
             ))}
           </div>
         </div>
@@ -530,19 +555,19 @@ export default function LandingPage() {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
             <div className="text-center">
               <p className="text-5xl lg:text-6xl font-bold text-white mb-2">{stat1.count}+</p>
-              <p className="text-blue-300 font-medium">Healthcare Providers</p>
-            </div>
-            <div className="text-center">
-              <p className="text-5xl lg:text-6xl font-bold text-white mb-2">{stat2.count}M+</p>
               <p className="text-blue-300 font-medium">Patients Managed</p>
             </div>
             <div className="text-center">
-              <p className="text-5xl lg:text-6xl font-bold text-white mb-2">{stat3.count}.9%</p>
-              <p className="text-blue-300 font-medium">Uptime SLA</p>
+              <p className="text-5xl lg:text-6xl font-bold text-white mb-2">{stat2.count}K+</p>
+              <p className="text-blue-300 font-medium">Appointments</p>
             </div>
             <div className="text-center">
-              <p className="text-5xl lg:text-6xl font-bold text-white mb-2">{stat4.count}%</p>
-              <p className="text-blue-300 font-medium">Time Saved</p>
+              <p className="text-5xl lg:text-6xl font-bold text-white mb-2">{stat3.count}%</p>
+              <p className="text-blue-300 font-medium">Uptime</p>
+            </div>
+            <div className="text-center">
+              <p className="text-5xl lg:text-6xl font-bold text-white mb-2">{stat4.count}/7</p>
+              <p className="text-blue-300 font-medium">Support</p>
             </div>
           </div>
         </div>
@@ -554,14 +579,14 @@ export default function LandingPage() {
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 rounded-full text-blue-700 text-sm font-medium mb-4">
               <Zap className="h-4 w-4" />
-              Powerful Features
+              Complete Feature Set
             </div>
             <h2 className="text-3xl lg:text-5xl font-bold text-slate-900 mb-4">
-              Everything You Need to<br className="hidden lg:block" /> Run Your Hospital
+              Everything Your Hospital Needs
             </h2>
             <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-              A complete suite of tools designed specifically for modern healthcare
-              providers to streamline operations and enhance patient care.
+              A comprehensive suite of tools designed for modern healthcare
+              management - from appointments to emergency triage.
             </p>
           </div>
 
@@ -590,14 +615,13 @@ export default function LandingPage() {
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-50 rounded-full text-emerald-700 text-sm font-medium mb-4">
               <Star className="h-4 w-4 fill-emerald-500" />
-              Customer Stories
+              Success Stories
             </div>
             <h2 className="text-3xl lg:text-5xl font-bold text-slate-900 mb-4">
-              Loved by Healthcare Leaders
+              Trusted by Healthcare Leaders
             </h2>
             <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-              See why leading hospitals and medical practices trust HealthCare Pro
-              for their daily operations.
+              See how hospitals are transforming their operations with NHMS.
             </p>
           </div>
 
@@ -611,11 +635,9 @@ export default function LandingPage() {
                 </div>
                 <p className="text-slate-700 mb-6 leading-relaxed">&ldquo;{testimonial.quote}&rdquo;</p>
                 <div className="flex items-center gap-4">
-                  <img
-                    src={testimonial.image}
-                    alt={testimonial.author}
-                    className="w-12 h-12 rounded-full object-cover"
-                  />
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white font-semibold">
+                    {testimonial.author.split(" ").map(n => n[0]).join("")}
+                  </div>
                   <div>
                     <p className="font-semibold text-slate-900">{testimonial.author}</p>
                     <p className="text-sm text-slate-500">{testimonial.role}</p>
@@ -640,7 +662,7 @@ export default function LandingPage() {
               Plans for Every Healthcare Provider
             </h2>
             <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-              Start free and scale as you grow. No hidden fees, no surprises.
+              Start free and scale as you grow. No hidden fees.
             </p>
           </div>
 
@@ -667,7 +689,7 @@ export default function LandingPage() {
                 </p>
                 <div className="mb-6">
                   <span className={`text-4xl lg:text-5xl font-bold ${plan.popular ? "text-white" : "text-slate-900"}`}>
-                    {plan.price === "Custom" ? "" : "$"}{plan.price}
+                    {plan.price === "Custom" || plan.price === "Free" ? "" : "$"}{plan.price}
                   </span>
                   {plan.period && (
                     <span className={plan.popular ? "text-blue-100" : "text-slate-600"}>/{plan.period}</span>
@@ -681,15 +703,16 @@ export default function LandingPage() {
                     </li>
                   ))}
                 </ul>
-                <button
-                  className={`w-full py-3 rounded-xl font-semibold transition-all duration-300 ${
+                <Link
+                  href="/login"
+                  className={`block w-full py-3 rounded-xl font-semibold transition-all duration-300 text-center ${
                     plan.popular
                       ? "bg-white text-blue-600 hover:bg-blue-50"
                       : "bg-slate-900 text-white hover:bg-slate-800"
                   }`}
                 >
                   {plan.cta}
-                </button>
+                </Link>
               </div>
             ))}
           </div>
@@ -708,7 +731,7 @@ export default function LandingPage() {
               Frequently Asked Questions
             </h2>
             <p className="text-lg text-slate-600">
-              Everything you need to know about HealthCare Pro.
+              Everything you need to know about NHMS.
             </p>
           </div>
 
@@ -746,24 +769,24 @@ export default function LandingPage() {
 
         <div className="relative max-w-4xl mx-auto text-center">
           <h2 className="text-3xl lg:text-5xl font-bold text-white mb-6">
-            Ready to Transform Your Healthcare Operations?
+            Ready to Transform Your Hospital?
           </h2>
           <p className="text-xl text-blue-100 mb-10 max-w-2xl mx-auto">
-            Join 500+ healthcare providers who trust HealthCare Pro. Start your free
-            trial today and see the difference.
+            Join healthcare providers who trust NHMS for their daily operations.
+            Start free today - no credit card required.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
               href="/login"
               className="group w-full sm:w-auto px-8 py-4 bg-white text-blue-600 font-semibold rounded-full hover:bg-blue-50 hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2"
             >
-              Start Free Trial
+              Get Started Free
               <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
             </Link>
-            <button className="w-full sm:w-auto px-8 py-4 bg-blue-500/30 text-white font-semibold rounded-full border border-white/30 hover:bg-blue-500/50 transition-all duration-300 flex items-center justify-center gap-2">
-              <Phone className="h-5 w-5" />
-              Schedule a Demo
-            </button>
+            <a href="#features" className="w-full sm:w-auto px-8 py-4 bg-blue-500/30 text-white font-semibold rounded-full border border-white/30 hover:bg-blue-500/50 transition-all duration-300 flex items-center justify-center gap-2">
+              <Globe className="h-5 w-5" />
+              Explore Features
+            </a>
           </div>
         </div>
       </section>
@@ -776,12 +799,12 @@ export default function LandingPage() {
             <div className="col-span-2 lg:col-span-1">
               <div className="flex items-center gap-2 mb-4">
                 <div className="bg-gradient-to-r from-blue-500 to-cyan-500 p-2 rounded-xl">
-                  <Heart className="h-5 w-5 text-white" />
+                  <Building2 className="h-5 w-5 text-white" />
                 </div>
-                <span className="text-lg font-bold text-white">HealthCare Pro</span>
+                <span className="text-lg font-bold text-white">NHMS</span>
               </div>
               <p className="text-slate-400 text-sm mb-4">
-                Modern hospital management for the digital age.
+                National Health Management System - Complete hospital management for the digital age.
               </p>
               <div className="flex gap-3">
                 <a href="#" className="w-9 h-9 bg-slate-800 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-700 transition-colors">
@@ -793,9 +816,6 @@ export default function LandingPage() {
                 <a href="#" className="w-9 h-9 bg-slate-800 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-700 transition-colors">
                   <Facebook className="h-4 w-4" />
                 </a>
-                <a href="#" className="w-9 h-9 bg-slate-800 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-700 transition-colors">
-                  <Instagram className="h-4 w-4" />
-                </a>
               </div>
             </div>
 
@@ -806,18 +826,18 @@ export default function LandingPage() {
                 <li><a href="#features" className="text-slate-400 hover:text-white transition-colors">Features</a></li>
                 <li><a href="#pricing" className="text-slate-400 hover:text-white transition-colors">Pricing</a></li>
                 <li><a href="#" className="text-slate-400 hover:text-white transition-colors">Integrations</a></li>
-                <li><a href="#" className="text-slate-400 hover:text-white transition-colors">Changelog</a></li>
+                <li><a href="#" className="text-slate-400 hover:text-white transition-colors">Updates</a></li>
               </ul>
             </div>
 
-            {/* Company */}
+            {/* Features */}
             <div>
-              <h4 className="text-white font-semibold mb-4">Company</h4>
+              <h4 className="text-white font-semibold mb-4">Features</h4>
               <ul className="space-y-2 text-sm">
-                <li><a href="#" className="text-slate-400 hover:text-white transition-colors">About</a></li>
-                <li><a href="#" className="text-slate-400 hover:text-white transition-colors">Careers</a></li>
-                <li><a href="#" className="text-slate-400 hover:text-white transition-colors">Blog</a></li>
-                <li><a href="#" className="text-slate-400 hover:text-white transition-colors">Press</a></li>
+                <li><a href="#" className="text-slate-400 hover:text-white transition-colors">Appointments</a></li>
+                <li><a href="#" className="text-slate-400 hover:text-white transition-colors">Billing</a></li>
+                <li><a href="#" className="text-slate-400 hover:text-white transition-colors">Lab Tests</a></li>
+                <li><a href="#" className="text-slate-400 hover:text-white transition-colors">Emergency</a></li>
               </ul>
             </div>
 
@@ -827,8 +847,8 @@ export default function LandingPage() {
               <ul className="space-y-2 text-sm">
                 <li><a href="#" className="text-slate-400 hover:text-white transition-colors">Documentation</a></li>
                 <li><a href="#" className="text-slate-400 hover:text-white transition-colors">Help Center</a></li>
-                <li><a href="#" className="text-slate-400 hover:text-white transition-colors">API Reference</a></li>
-                <li><a href="#" className="text-slate-400 hover:text-white transition-colors">Status</a></li>
+                <li><a href="#faq" className="text-slate-400 hover:text-white transition-colors">FAQ</a></li>
+                <li><a href="#" className="text-slate-400 hover:text-white transition-colors">Contact</a></li>
               </ul>
             </div>
 
@@ -839,19 +859,17 @@ export default function LandingPage() {
                 <li><a href="#" className="text-slate-400 hover:text-white transition-colors">Privacy</a></li>
                 <li><a href="#" className="text-slate-400 hover:text-white transition-colors">Terms</a></li>
                 <li><a href="#" className="text-slate-400 hover:text-white transition-colors">Security</a></li>
-                <li><a href="#" className="text-slate-400 hover:text-white transition-colors">HIPAA</a></li>
               </ul>
             </div>
           </div>
 
           <div className="pt-8 border-t border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-slate-400 text-sm">
-              © 2024 HealthCare Pro. All rights reserved.
+              © 2024 NHMS - National Health Management System. All rights reserved.
             </p>
             <div className="flex items-center gap-6 text-sm">
               <a href="#" className="text-slate-400 hover:text-white transition-colors">Privacy Policy</a>
               <a href="#" className="text-slate-400 hover:text-white transition-colors">Terms of Service</a>
-              <a href="#" className="text-slate-400 hover:text-white transition-colors">Cookie Settings</a>
             </div>
           </div>
         </div>

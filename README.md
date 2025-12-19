@@ -1,6 +1,6 @@
 # National Health Management System (NHMS)
 
-A modern, multi-tenant hospital management system built with Next.js 14, featuring separate dashboards for Administrators, Doctors, and Patients. This SaaS platform enables healthcare facilities to manage appointments, prescriptions, medical records, and more.
+A comprehensive, enterprise-grade hospital management system built with Next.js 14, featuring separate dashboards for Administrators, Doctors, and Patients. This multi-tenant SaaS platform enables healthcare facilities to manage appointments, prescriptions, billing, lab tests, vital signs, emergency triage, and more.
 
 ## Table of Contents
 
@@ -14,7 +14,7 @@ A modern, multi-tenant hospital management system built with Next.js 14, featuri
 - [Project Structure](#project-structure)
 - [API Reference](#api-reference)
 - [User Roles](#user-roles)
-- [Screenshots](#screenshots)
+- [User Manual](#user-manual)
 - [Deployment](#deployment)
 - [Contributing](#contributing)
 - [License](#license)
@@ -24,39 +24,50 @@ A modern, multi-tenant hospital management system built with Next.js 14, featuri
 ### Multi-Tenant Architecture
 - Hospital-based tenant isolation
 - Customizable branding per hospital (logo, colors)
+- Multi-currency support (25+ currencies including USD, EUR, BDT, INR)
+- Configurable timezone and date formats
 - Subscription-based access levels
 
 ### Admin Dashboard
-- **Dashboard Overview**: Real-time statistics, revenue charts, recent activities
+- **Dashboard Overview**: Real-time statistics, revenue charts, appointment trends
 - **Doctor Management**: Add, edit, deactivate doctors with department assignment
 - **Patient Management**: View and manage patient records
 - **Department Management**: Create and organize hospital departments
 - **Appointment Management**: View and manage all appointments
-- **Reports & Analytics**: Generate PDF reports, view trends
-- **Hospital Settings**: Configure hospital details, upload logo, set branding colors
+- **Billing & Invoicing**: Complete billing system with invoice generation, payment tracking
+- **Emergency Triage**: Priority-based emergency queue management
+- **Reports & Analytics**: Comprehensive dashboards with KPIs and insights
+- **Audit Logs**: Complete activity tracking and security monitoring
+- **Hospital Settings**: Configure branding, regional settings, and preferences
 
 ### Doctor Dashboard
-- **Dashboard Overview**: Today's appointments, patient statistics
+- **Dashboard Overview**: Today's appointments, patient statistics, weekly charts
 - **Appointment Management**: View scheduled appointments, update status
-- **Patient Records**: Access patient medical history
-- **Prescriptions**: Create and manage prescriptions
+- **Patient Records**: Access complete patient medical history
+- **Prescriptions**: Create prescriptions with drug interaction warnings
+- **Lab Test Management**: Order tests, view results, track history
+- **Vital Signs**: Record and monitor patient vitals with trend charts
 - **Schedule Management**: Set availability and working hours
-- **Medical Records**: Create diagnosis, lab reports, imaging records
+- **Medical Records**: Create diagnoses, lab reports, imaging records
 
 ### Patient Dashboard
 - **Dashboard Overview**: Upcoming appointments, recent prescriptions, health summary
 - **Book Appointments**: Search doctors, select time slots, book consultations
 - **My Appointments**: View, filter, and cancel appointments
 - **Prescriptions**: View prescriptions with print and PDF download
+- **Lab Tests**: View ordered tests and results
+- **Vital Signs**: Track health metrics over time with visual charts
 - **Medical Records**: Access all medical records with filtering and PDF export
 - **Profile Management**: Update personal info, medical info, emergency contacts
-- **Avatar Upload**: Upload and manage profile photos
-- **Password Change**: Secure password update
 
-### Authentication
-- Role-based authentication (Admin, Doctor, Patient)
-- Secure session management with NextAuth.js v5
-- Protected routes with middleware
+### Enterprise Features
+- **Multi-Currency Support**: 25+ currencies with configurable formatting
+- **Drug Interaction Warnings**: Automatic alerts for medication conflicts
+- **Emergency Triage System**: 5-level priority system (Resuscitation to Non-Urgent)
+- **Audit Logging**: Complete activity trail for compliance
+- **Notification System**: Real-time alerts for appointments, results, emergencies
+- **Role-Based Access Control**: Granular permissions per user type
+- **Data Export**: PDF generation for prescriptions, records, invoices
 
 ## Tech Stack
 
@@ -78,32 +89,40 @@ A modern, multi-tenant hospital management system built with Next.js 14, featuri
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    Next.js 14 Application                    │
-├─────────────────────────────────────────────────────────────┤
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐         │
-│  │   Admin     │  │   Doctor    │  │   Patient   │         │
-│  │  Dashboard  │  │  Dashboard  │  │  Dashboard  │         │
-│  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘         │
-│         │                │                │                 │
-│         └────────────────┼────────────────┘                 │
-│                          │                                  │
-│              ┌───────────┴───────────┐                     │
-│              │    API Routes         │                     │
-│              │  /api/admin/*         │                     │
-│              │  /api/patient/*       │                     │
-│              │  /api/hospital/*      │                     │
-│              └───────────┬───────────┘                     │
-│                          │                                  │
-│              ┌───────────┴───────────┐                     │
-│              │    Prisma ORM         │                     │
-│              └───────────┬───────────┘                     │
-│                          │                                  │
-└──────────────────────────┼──────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                    Next.js 14 Application                        │
+├─────────────────────────────────────────────────────────────────┤
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐              │
+│  │   Admin     │  │   Doctor    │  │   Patient   │              │
+│  │  Dashboard  │  │  Dashboard  │  │  Dashboard  │              │
+│  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘              │
+│         │                │                │                      │
+│         └────────────────┼────────────────┘                      │
+│                          │                                       │
+│              ┌───────────┴───────────┐                          │
+│              │      API Routes       │                          │
+│              │  /api/admin/*         │                          │
+│              │  /api/doctor/*        │                          │
+│              │  /api/patient/*       │                          │
+│              │  /api/hospital/*      │                          │
+│              └───────────┬───────────┘                          │
+│                          │                                       │
+│    ┌─────────────────────┼─────────────────────┐                │
+│    │                     │                     │                 │
+│    ▼                     ▼                     ▼                 │
+│ ┌──────────┐      ┌──────────┐         ┌──────────┐             │
+│ │ Currency │      │  Audit   │         │ Notif.   │             │
+│ │ Context  │      │  Logger  │         │ System   │             │
+│ └──────────┘      └──────────┘         └──────────┘             │
+│                          │                                       │
+│              ┌───────────┴───────────┐                          │
+│              │      Prisma ORM       │                          │
+│              └───────────┬───────────┘                          │
+└──────────────────────────┼───────────────────────────────────────┘
                            │
                ┌───────────┴───────────┐
-               │      MySQL Database    │
-               │  (Multi-tenant data)   │
+               │    MySQL Database     │
+               │  (Multi-tenant data)  │
                └───────────────────────┘
 ```
 
@@ -196,24 +215,12 @@ The system uses the following data models:
 | `Appointment` | Scheduled appointments |
 | `Prescription` | Medical prescriptions |
 | `MedicalRecord` | Patient medical records |
-
-### Entity Relationship
-
-```
-Hospital (1) ─────┬───── (*) Admin
-                  ├───── (*) Doctor ────── (*) Appointment
-                  ├───── (*) Patient ───── (*) Appointment
-                  ├───── (*) Department
-                  └───── (*) Appointment
-
-Doctor (1) ─────┬───── (*) Prescription
-                ├───── (*) MedicalRecord
-                └───── (*) Appointment
-
-Patient (1) ────┬───── (*) Prescription
-                ├───── (*) MedicalRecord
-                └───── (*) Appointment
-```
+| `LabTest` | Laboratory test orders and results |
+| `VitalSign` | Patient vital sign recordings |
+| `Invoice` | Billing invoices |
+| `EmergencyCase` | Emergency triage cases |
+| `AuditLog` | System activity logs |
+| `Notification` | User notifications |
 
 ### Available Scripts
 
@@ -240,85 +247,46 @@ National-Health-Management-System/
 ├── src/
 │   ├── app/
 │   │   ├── (auth)/            # Authentication pages
-│   │   │   ├── login/
-│   │   │   └── layout.tsx
 │   │   ├── (dashboard)/       # Protected dashboard routes
 │   │   │   ├── admin/         # Admin pages
-│   │   │   │   ├── page.tsx              # Dashboard
 │   │   │   │   ├── appointments/
+│   │   │   │   ├── billing/
 │   │   │   │   ├── departments/
 │   │   │   │   ├── doctors/
+│   │   │   │   ├── emergency/
 │   │   │   │   ├── patients/
 │   │   │   │   ├── reports/
+│   │   │   │   ├── audit-logs/
 │   │   │   │   └── settings/
 │   │   │   ├── doctor/        # Doctor pages
-│   │   │   │   ├── page.tsx
 │   │   │   │   ├── appointments/
+│   │   │   │   ├── lab-tests/
 │   │   │   │   ├── patients/
 │   │   │   │   ├── prescriptions/
 │   │   │   │   ├── records/
-│   │   │   │   └── schedule/
-│   │   │   ├── patient/       # Patient pages
-│   │   │   │   ├── page.tsx              # Dashboard
-│   │   │   │   ├── appointments/
-│   │   │   │   ├── book/
-│   │   │   │   ├── prescriptions/
-│   │   │   │   ├── profile/
-│   │   │   │   └── records/
-│   │   │   └── layout.tsx
-│   │   ├── (marketing)/       # Public marketing pages
-│   │   │   ├── page.tsx       # Landing page
-│   │   │   └── layout.tsx
-│   │   ├── api/               # API routes
-│   │   │   ├── admin/
-│   │   │   │   ├── appointments/
-│   │   │   │   ├── departments/
-│   │   │   │   ├── doctors/
-│   │   │   │   ├── patients/
-│   │   │   │   ├── reports/
-│   │   │   │   ├── settings/
-│   │   │   │   └── stats/
-│   │   │   ├── auth/
-│   │   │   │   └── [...nextauth]/
-│   │   │   ├── hospital/
-│   │   │   │   └── info/
-│   │   │   └── patient/
+│   │   │   │   ├── schedule/
+│   │   │   │   └── vitals/
+│   │   │   └── patient/       # Patient pages
 │   │   │       ├── appointments/
 │   │   │       ├── book/
-│   │   │       ├── dashboard/
+│   │   │       ├── lab-tests/
 │   │   │       ├── prescriptions/
 │   │   │       ├── profile/
-│   │   │       └── records/
-│   │   ├── globals.css
-│   │   └── layout.tsx
+│   │   │       ├── records/
+│   │   │       └── vitals/
+│   │   ├── (marketing)/       # Public marketing pages
+│   │   └── api/               # API routes
 │   ├── components/
 │   │   ├── dashboard/         # Dashboard components
-│   │   │   ├── Header.tsx
-│   │   │   ├── Sidebar.tsx
-│   │   │   └── StatsCard.tsx
-│   │   ├── marketing/         # Marketing page components
 │   │   └── ui/                # Reusable UI components
-│   │       ├── Avatar.tsx
-│   │       ├── Badge.tsx
-│   │       ├── Button.tsx
-│   │       ├── Card.tsx
-│   │       ├── Input.tsx
-│   │       ├── Modal.tsx
-│   │       ├── Select.tsx
-│   │       └── Table.tsx
-│   ├── lib/
-│   │   ├── auth.ts            # NextAuth configuration
-│   │   ├── prisma.ts          # Prisma client instance
-│   │   └── utils.ts           # Utility functions
-│   └── types/
-│       └── next-auth.d.ts     # Type definitions
-├── .env.example
-├── .gitignore
-├── next.config.ts
-├── package.json
-├── postcss.config.mjs
-├── tailwind.config.js
-├── tsconfig.json
+│   ├── contexts/
+│   │   └── CurrencyContext.tsx # Currency provider
+│   └── lib/
+│       ├── auth.ts            # NextAuth configuration
+│       ├── prisma.ts          # Prisma client
+│       ├── currency.ts        # Currency utilities
+│       ├── audit.ts           # Audit logging
+│       └── notifications.ts   # Notification system
 └── README.md
 ```
 
@@ -335,43 +303,39 @@ National-Health-Management-System/
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/api/admin/stats` | Dashboard statistics |
-| GET | `/api/admin/appointments` | List all appointments |
-| PATCH | `/api/admin/appointments` | Update appointment status |
-| GET | `/api/admin/doctors` | List all doctors |
-| POST | `/api/admin/doctors` | Create doctor |
-| PATCH | `/api/admin/doctors` | Update doctor |
-| DELETE | `/api/admin/doctors` | Delete doctor |
-| GET | `/api/admin/patients` | List all patients |
-| PATCH | `/api/admin/patients` | Update patient |
-| DELETE | `/api/admin/patients` | Delete patient |
-| GET | `/api/admin/departments` | List departments |
-| POST | `/api/admin/departments` | Create department |
-| PATCH | `/api/admin/departments` | Update department |
-| DELETE | `/api/admin/departments` | Delete department |
+| GET/PATCH | `/api/admin/appointments` | Manage appointments |
+| GET/POST/PATCH/DELETE | `/api/admin/doctors` | Manage doctors |
+| GET/PATCH/DELETE | `/api/admin/patients` | Manage patients |
+| GET/POST/PATCH/DELETE | `/api/admin/departments` | Manage departments |
 | GET | `/api/admin/reports` | Generate reports |
-| GET | `/api/admin/settings` | Get hospital settings |
-| PUT | `/api/admin/settings` | Update settings |
-| POST | `/api/admin/settings/upload-logo` | Upload hospital logo |
+| GET/PUT | `/api/admin/settings` | Hospital settings |
+| GET/POST/PATCH | `/api/admin/billing` | Billing management |
+| GET/POST/PATCH | `/api/admin/emergency` | Emergency triage |
+| GET | `/api/admin/audit-logs` | View audit logs |
+
+### Doctor Endpoints
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/doctor/stats` | Dashboard statistics |
+| GET/PATCH | `/api/doctor/appointments` | Manage appointments |
+| GET | `/api/doctor/patients` | View patients |
+| GET/POST | `/api/doctor/prescriptions` | Manage prescriptions |
+| GET/POST | `/api/doctor/records` | Medical records |
+| GET/POST | `/api/doctor/lab-tests` | Lab test management |
+| GET/POST | `/api/doctor/vitals` | Vital signs |
+| GET/PUT | `/api/doctor/schedule` | Schedule management |
 
 ### Patient Endpoints
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/api/patient/dashboard` | Dashboard data |
-| GET | `/api/patient/appointments` | List appointments |
-| PATCH | `/api/patient/appointments` | Cancel appointment |
+| GET/PATCH | `/api/patient/appointments` | View/cancel appointments |
 | POST | `/api/patient/book` | Book appointment |
-| GET | `/api/patient/prescriptions` | List prescriptions |
-| GET | `/api/patient/records` | List medical records |
-| GET | `/api/patient/profile` | Get profile |
-| PUT | `/api/patient/profile` | Update profile |
-| PATCH | `/api/patient/profile` | Change password |
-| POST | `/api/patient/profile/avatar` | Upload avatar |
-| DELETE | `/api/patient/profile/avatar` | Remove avatar |
-
-### Hospital Endpoints
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/hospital/info` | Get hospital information |
+| GET | `/api/patient/prescriptions` | View prescriptions |
+| GET | `/api/patient/records` | Medical records |
+| GET | `/api/patient/lab-tests` | Lab test results |
+| GET | `/api/patient/vitals` | Vital signs history |
+| GET/PUT/PATCH | `/api/patient/profile` | Profile management |
 
 ## User Roles
 
@@ -393,31 +357,20 @@ After running `npm run db:seed`, use these credentials:
 | Manage Doctors | Yes | No | No |
 | Manage Patients | Yes | View Only | No |
 | Manage Departments | Yes | No | No |
-| View Appointments | All | Own | Own |
-| Create Appointments | No | No | Yes |
-| Cancel Appointments | Yes | Yes | Own |
+| Billing & Invoicing | Yes | No | View Own |
+| Emergency Triage | Yes | No | No |
+| Audit Logs | Yes | No | No |
 | Create Prescriptions | No | Yes | No |
-| View Prescriptions | No | Own | Own |
-| Create Medical Records | No | Yes | No |
-| View Medical Records | No | Own Patients | Own |
+| Order Lab Tests | No | Yes | No |
+| Record Vital Signs | No | Yes | No |
+| View Lab Results | No | Own Patients | Own |
+| View Vital Signs | No | Own Patients | Own |
+| Book Appointments | No | No | Yes |
 | Hospital Settings | Yes | No | No |
-| Generate Reports | Yes | No | No |
 
-## Screenshots
+## User Manual
 
-### Landing Page
-The marketing landing page showcasing hospital services.
-
-### Admin Dashboard
-![Admin Dashboard](docs/screenshots/admin-dashboard.png)
-
-### Patient Dashboard
-![Patient Dashboard](docs/screenshots/patient-dashboard.png)
-
-### Book Appointment
-![Book Appointment](docs/screenshots/book-appointment.png)
-
-*(Add your own screenshots in the `docs/screenshots/` directory)*
+See [USER_MANUAL.md](USER_MANUAL.md) for detailed usage instructions.
 
 ## Deployment
 
@@ -429,26 +382,6 @@ The marketing landing page showcasing hospital services.
 4. Deploy
 
 ### Docker
-
-```dockerfile
-# Dockerfile
-FROM node:18-alpine AS builder
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci
-COPY . .
-RUN npm run build
-
-FROM node:18-alpine AS runner
-WORKDIR /app
-ENV NODE_ENV=production
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
-
-EXPOSE 3000
-CMD ["node", "server.js"]
-```
 
 ```bash
 # Build and run
@@ -474,13 +407,6 @@ npm run start
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-### Code Style
-
-- Follow TypeScript best practices
-- Use meaningful variable and function names
-- Write comments for complex logic
-- Ensure all TypeScript types are properly defined
-
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
@@ -498,6 +424,7 @@ For support, please:
 - [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS framework
 - [NextAuth.js](https://next-auth.js.org/) - Authentication for Next.js
 - [Lucide](https://lucide.dev/) - Beautiful icons
+- [Recharts](https://recharts.org/) - Charting library
 
 ---
 

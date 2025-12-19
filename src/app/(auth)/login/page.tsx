@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import {
-  Heart,
   Mail,
   Lock,
   ArrowRight,
@@ -19,6 +18,11 @@ import {
   Building2,
   Clock,
   Sparkles,
+  Activity,
+  Calendar,
+  FileText,
+  CreditCard,
+  TestTube,
 } from "lucide-react";
 
 type UserType = "patient" | "doctor" | "admin";
@@ -57,9 +61,11 @@ const userTypes = [
 ];
 
 const features = [
-  { icon: <CheckCircle2 className="h-5 w-5" />, text: "HIPAA Compliant & Secure" },
-  { icon: <Clock className="h-5 w-5" />, text: "24/7 System Availability" },
-  { icon: <Building2 className="h-5 w-5" />, text: "Multi-Location Support" },
+  { icon: <Calendar className="h-5 w-5" />, text: "Smart Appointment Scheduling" },
+  { icon: <FileText className="h-5 w-5" />, text: "Digital Prescriptions & Records" },
+  { icon: <TestTube className="h-5 w-5" />, text: "Lab Tests & Vital Signs" },
+  { icon: <CreditCard className="h-5 w-5" />, text: "Multi-Currency Billing" },
+  { icon: <Activity className="h-5 w-5" />, text: "Emergency Triage System" },
 ];
 
 export default function LoginPage() {
@@ -121,25 +127,28 @@ export default function LoginPage() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3">
             <div className="bg-white/20 backdrop-blur-sm p-2.5 rounded-xl">
-              <Heart className="h-7 w-7 text-white" />
+              <Building2 className="h-7 w-7 text-white" />
             </div>
-            <span className="text-2xl font-bold text-white">HealthCare Pro</span>
+            <div>
+              <span className="text-2xl font-bold text-white">NHMS</span>
+              <span className="block text-sm text-blue-200">National Health Management</span>
+            </div>
           </Link>
 
           {/* Main Content */}
           <div className="space-y-8">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-white/90 text-sm font-medium">
               <Sparkles className="h-4 w-4" />
-              Trusted by 500+ Healthcare Providers
+              Complete Hospital Management Solution
             </div>
 
             <h1 className="text-4xl xl:text-5xl font-bold text-white leading-tight">
-              Welcome to the Future of Healthcare Management
+              National Health Management System
             </h1>
 
             <p className="text-xl text-blue-100 leading-relaxed max-w-lg">
-              Streamline operations, enhance patient care, and grow your practice
-              with our comprehensive AI-powered platform.
+              Manage appointments, prescriptions, billing, lab tests, vital signs,
+              and emergency triage - all in one powerful platform.
             </p>
 
             {/* Features */}
@@ -156,20 +165,25 @@ export default function LoginPage() {
           </div>
 
           {/* Stats */}
-          <div className="flex items-center gap-12">
+          <div className="flex items-center gap-8">
             <div>
-              <p className="text-4xl font-bold text-white">500+</p>
-              <p className="text-blue-200 text-sm">Hospitals</p>
+              <p className="text-3xl font-bold text-white">3</p>
+              <p className="text-blue-200 text-sm">User Portals</p>
             </div>
             <div className="w-px h-12 bg-white/20" />
             <div>
-              <p className="text-4xl font-bold text-white">2M+</p>
-              <p className="text-blue-200 text-sm">Patients</p>
+              <p className="text-3xl font-bold text-white">25+</p>
+              <p className="text-blue-200 text-sm">Currencies</p>
             </div>
             <div className="w-px h-12 bg-white/20" />
             <div>
-              <p className="text-4xl font-bold text-white">99.9%</p>
-              <p className="text-blue-200 text-sm">Uptime</p>
+              <p className="text-3xl font-bold text-white">24/7</p>
+              <p className="text-blue-200 text-sm">Available</p>
+            </div>
+            <div className="w-px h-12 bg-white/20" />
+            <div>
+              <p className="text-3xl font-bold text-white">100%</p>
+              <p className="text-blue-200 text-sm">Secure</p>
             </div>
           </div>
         </div>
@@ -182,19 +196,22 @@ export default function LoginPage() {
           <div className="lg:hidden mb-8 text-center">
             <Link href="/" className="inline-flex items-center gap-3">
               <div className="bg-gradient-to-r from-blue-600 to-cyan-500 p-2.5 rounded-xl">
-                <Heart className="h-6 w-6 text-white" />
+                <Building2 className="h-6 w-6 text-white" />
               </div>
-              <span className="text-xl font-bold text-slate-900">HealthCare Pro</span>
+              <div className="text-left">
+                <span className="text-xl font-bold text-slate-900">NHMS</span>
+                <span className="block text-xs text-slate-500">National Health Management</span>
+              </div>
             </Link>
           </div>
 
           {/* Header */}
           <div className="text-center lg:text-left mb-8">
             <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">
-              Welcome back
+              Sign in to NHMS
             </h2>
             <p className="text-slate-600">
-              Sign in to your account to continue
+              Access your healthcare management dashboard
             </p>
           </div>
 
@@ -345,12 +362,12 @@ export default function LoginPage() {
 
           {/* Register Link */}
           <p className="mt-8 text-center text-sm text-slate-600">
-            Don&apos;t have an account?{" "}
+            New to NHMS?{" "}
             <Link
               href="/register"
               className="text-blue-600 hover:text-blue-700 font-semibold transition-colors"
             >
-              Register as Patient
+              Create Patient Account
             </Link>
           </p>
 
@@ -361,6 +378,17 @@ export default function LoginPage() {
             {" "}and{" "}
             <a href="#" className="text-slate-600 hover:text-slate-900">Privacy Policy</a>
           </p>
+
+          {/* Back to Home */}
+          <div className="mt-6 text-center">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-700 transition-colors"
+            >
+              <ArrowRight className="h-4 w-4 rotate-180" />
+              Back to Home
+            </Link>
+          </div>
         </div>
       </div>
     </div>

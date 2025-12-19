@@ -1,7 +1,7 @@
-# HealthCare Pro - Hospital Management System
+# NHMS - National Health Management System
 ## User Manual
 
-**Version:** 1.0.0
+**Version:** 2.0.0
 **Last Updated:** December 2024
 
 ---
@@ -22,28 +22,34 @@
 
 ## Introduction
 
-HealthCare Pro is a comprehensive, multi-tenant Hospital Management System designed to streamline healthcare operations. The system provides three dedicated portals for different user roles:
+NHMS (National Health Management System) is a comprehensive, enterprise-grade hospital management platform designed to streamline healthcare operations. The system provides three dedicated portals for different user roles:
 
-- **Admin Portal** - For hospital administrators to manage staff, departments, and monitor analytics
-- **Doctor Portal** - For medical professionals to manage patients, appointments, and prescriptions
-- **Patient Portal** - For patients to book appointments, view prescriptions, and access medical records
+- **Admin Portal** - For hospital administrators to manage staff, departments, billing, emergency triage, and monitor analytics
+- **Doctor Portal** - For medical professionals to manage patients, appointments, prescriptions, lab tests, and vital signs
+- **Patient Portal** - For patients to book appointments, view prescriptions, lab results, and access medical records
 
 ### Key Features
 
 | Feature | Admin | Doctor | Patient |
 |---------|:-----:|:------:|:-------:|
-| Dashboard Analytics | ✓ | ✓ | ✓ |
-| User Management | ✓ | - | - |
-| Department Management | ✓ | - | - |
-| Reports & Analytics | ✓ | - | - |
-| Hospital Settings | ✓ | - | - |
-| Schedule Management | - | ✓ | - |
-| Patient Management | ✓ | ✓ | - |
-| Appointment Management | ✓ | ✓ | ✓ |
-| Prescription Management | - | ✓ | ✓ |
-| Medical Records | - | ✓ | ✓ |
-| Profile Management | - | - | ✓ |
-| Book Appointments | - | - | ✓ |
+| Dashboard Analytics | Yes | Yes | Yes |
+| User Management | Yes | - | - |
+| Department Management | Yes | - | - |
+| Billing & Invoicing | Yes | - | View Own |
+| Emergency Triage | Yes | - | - |
+| Audit Logs | Yes | - | - |
+| Reports & Analytics | Yes | - | - |
+| Hospital Settings | Yes | - | - |
+| Regional Settings (Currency) | Yes | - | - |
+| Schedule Management | - | Yes | - |
+| Patient Management | Yes | Yes | - |
+| Appointment Management | Yes | Yes | Yes |
+| Prescription Management | - | Yes | Yes |
+| Lab Test Management | - | Yes | Yes |
+| Vital Signs Tracking | - | Yes | Yes |
+| Medical Records | - | Yes | Yes |
+| Profile Management | - | - | Yes |
+| Book Appointments | - | - | Yes |
 
 ---
 
@@ -152,18 +158,9 @@ The admin dashboard provides a comprehensive overview of hospital operations.
 - Monthly Revenue Overview (Area Chart)
 - Appointment Distribution by Department (Pie Chart)
 
-**Quick Access:**
-- Recent Appointments List
-- Top Performing Doctors
-
 ### Managing Doctors
 
-**Location:** Admin Portal → Doctors
-
-#### View All Doctors
-1. Navigate to **Doctors** from the sidebar
-2. Use the search bar to find doctors by name or email
-3. Filter by department using the dropdown
+**Location:** Admin Portal -> Doctors
 
 #### Add New Doctor
 1. Click **Add Doctor** button
@@ -173,10 +170,8 @@ The admin dashboard provides a comprehensive overview of hospital operations.
    - Phone Number
    - Department
    - Specialization
-   - Years of Experience
-   - Qualification
-   - Password
-3. Click **Add Doctor** to save
+   - Consultation Fee
+3. Click **Save** to create the doctor account
 
 #### Edit Doctor
 1. Find the doctor in the list
@@ -184,127 +179,136 @@ The admin dashboard provides a comprehensive overview of hospital operations.
 3. Update the necessary fields
 4. Click **Save Changes**
 
-#### Delete Doctor
-1. Find the doctor in the list
-2. Click the **Delete** (trash) icon
-3. Confirm deletion in the popup
-
 ### Managing Patients
 
-**Location:** Admin Portal → Patients
+**Location:** Admin Portal -> Patients
 
 #### View All Patients
 1. Navigate to **Patients** from the sidebar
 2. Search patients by name or email
 3. Filter by blood group if needed
 
-#### Add New Patient
-1. Click **Add Patient** button
-2. Fill in patient details:
-   - Personal Information (Name, Email, Phone, DOB)
-   - Gender and Blood Group
-   - Address
-   - Emergency Contact
-   - Password
-3. Click **Add Patient** to save
+### Billing & Invoicing
 
-#### Export Patient Data
-1. Click the **Export** button
-2. Data will be downloaded as CSV
+**Location:** Admin Portal -> Billing
 
-### Managing Appointments
+#### View All Invoices
+1. Navigate to **Billing** from the sidebar
+2. View invoices with status: Paid, Pending, Overdue
+3. Use filters to find specific invoices
 
-**Location:** Admin Portal → Appointments
+#### Create Invoice
+1. Click **Create Invoice** button
+2. Select patient
+3. Add line items (services, tests, consultations)
+4. Set payment terms and due date
+5. Click **Generate Invoice**
 
-#### View Appointments
-- **Stats Cards** show: Total Today, Pending, Confirmed, Completed
-- Use filters to narrow down:
-  - Search by patient or doctor name
-  - Filter by status
-  - Filter by department
+#### Record Payment
+1. Find the invoice
+2. Click **Record Payment**
+3. Enter payment amount and method
+4. Confirm payment
 
-#### Manage Appointment Status
-1. Find the appointment in the table
-2. For pending appointments:
-   - Click **Confirm** to approve
-   - Click **Decline** to cancel
-3. Status will update immediately
+**Multi-Currency Support:**
+- The system supports 25+ currencies
+- Currency is configured in Settings -> Regional
+- All amounts display in the selected currency (e.g., 1,500.00 BDT)
 
-### Managing Departments
+### Emergency Triage
 
-**Location:** Admin Portal → Departments
+**Location:** Admin Portal -> Emergency
 
-#### Add New Department
-1. Click **Add Department** button
-2. Enter:
-   - Department Name
-   - Description
-   - Select an Icon
-3. Click **Create Department**
+#### Triage Priority Levels
+| Level | Color | Response Time | Description |
+|-------|-------|---------------|-------------|
+| Resuscitation | Red | Immediate | Life-threatening |
+| Emergency | Orange | < 10 min | Serious condition |
+| Urgent | Yellow | < 60 min | Requires attention |
+| Standard | Green | < 120 min | Non-urgent |
+| Non-Urgent | Blue | < 240 min | Minor issues |
 
-#### Edit Department
-1. Click **Edit** on the department card
-2. Update information
-3. Save changes
+#### Register Emergency Case
+1. Click **New Emergency**
+2. Enter patient information
+3. Describe chief complaint and symptoms
+4. Assign triage level based on severity
+5. Click **Register**
+
+#### Manage Emergency Queue
+1. View cases sorted by priority
+2. Click to update status
+3. Assign to available doctor
+4. Mark as completed when treated
 
 ### Reports & Analytics
 
-**Location:** Admin Portal → Reports
+**Location:** Admin Portal -> Reports
 
 #### Available Reports
-- **Monthly Trends** - Appointments and new patients over time
-- **Revenue Analysis** - Income trends and projections
-- **Department Performance** - Appointments by department
-- **Status Distribution** - Breakdown of appointment outcomes
+- **Financial Summary** - Revenue, payments, outstanding
+- **Appointment Statistics** - Trends, completion rates
+- **Patient Demographics** - Age, gender distribution
+- **Department Performance** - Activity by department
 
-#### Filtering Reports
-1. Use the period selector: 7 days, 30 days, 90 days, 1 year
-2. Charts update automatically
+#### Generate Report
+1. Select report type
+2. Choose date range (7 days, 30 days, 90 days, 1 year)
+3. Click **Generate**
+4. Export as PDF if needed
 
-#### Export Reports
-1. Click **Export Report** button
-2. Report downloads as PDF
+### Audit Logs
+
+**Location:** Admin Portal -> Audit Logs
+
+View all system activities for compliance and security monitoring:
+- User logins
+- Data modifications
+- Settings changes
+- Access attempts
+
+Filter by user, action type, or date range.
 
 ### Hospital Settings
 
-**Location:** Admin Portal → Settings
+**Location:** Admin Portal -> Settings
 
-#### General Information
-1. Navigate to **Settings** → **General** tab
-2. Update:
-   - Hospital Logo (click to upload)
-   - Hospital Name
-   - Contact Email
-   - Phone Number
-   - Website URL
-   - Address
-3. Click **Save Changes**
+#### General Tab
+- Hospital Name
+- Contact Email
+- Phone Number
+- Address
+- Website
 
-#### Branding Configuration
-1. Go to **Settings** → **Branding** tab
-2. Choose a preset theme or customize:
-   - Primary Color
-   - Secondary Color
-   - Accent Color
-3. Preview changes in real-time
-4. Click **Save Changes**
+#### Branding Tab
+- Upload hospital logo
+- Primary Color
+- Secondary Color
+- Accent Color
+- Preview changes in real-time
 
-#### Feature Toggles
-1. Go to **Settings** → **Features** tab
-2. Enable/disable features:
-   - Online Appointment Booking
-   - Digital Prescriptions
-   - Medical Records Access
-   - SMS Notifications (Premium)
-   - Email Notifications
-3. Save changes
+#### Regional Tab
+**Currency Settings:**
+- Select from 25+ currencies (USD, EUR, BDT, INR, etc.)
+- Currency code displays after amount (e.g., 1,500.00 BDT)
+- Preview how amounts will display
 
-#### Notification Settings
-1. Go to **Settings** → **Notifications** tab
-2. Configure:
-   - Appointment reminder timing
-   - Reply-to email address
-3. Save changes
+**Timezone Settings:**
+- Select your timezone (e.g., Asia/Dhaka for Bangladesh)
+- All times display in selected timezone
+
+**Date Format:**
+- MM/DD/YYYY
+- DD/MM/YYYY
+- YYYY-MM-DD
+
+#### Features Tab
+Enable/disable system features:
+- Online Appointment Booking
+- Digital Prescriptions
+- Medical Records Access
+- SMS Notifications
+- Email Notifications
 
 ---
 
@@ -319,117 +323,115 @@ The doctor dashboard shows your daily schedule and patient overview.
 **Key Metrics:**
 - Today's Appointments
 - Total Patients
-- Pending Reports
-- Average Consultation Time
-
-**Quick Actions:**
-- Write Prescription
-- Schedule Appointment
-- View Patient List
-- Manage Schedule
+- Pending Lab Tests
+- Weekly appointments chart
 
 ### Managing Appointments
 
-**Location:** Doctor Portal → Appointments
+**Location:** Doctor Portal -> Appointments
 
-#### View Your Appointments
+#### View Appointments
 1. Navigate to **Appointments**
-2. View stats: Today, Pending, Confirmed, Completed
-3. Filter by:
-   - Date (Today, Tomorrow, This Week, All)
-   - Status
+2. Filter by: Today, This Week, This Month
+3. View status: Scheduled, Completed, Cancelled
 
-#### Handle Pending Appointments
-1. Find pending appointments (yellow badge)
-2. Click **Accept** to confirm
-3. Click **Decline** to cancel
+#### Complete Appointment
+1. Find the appointment
+2. Click **Start Consultation**
+3. Add notes and diagnosis
+4. Create prescription if needed
+5. Order lab tests if required
+6. Click **Complete**
 
-#### Start Consultation
-1. Find a confirmed appointment
-2. Click **Start Video Call** (if enabled)
-3. Or click **View Details** to see patient information
+### Prescriptions
 
-### Managing Patients
+**Location:** Doctor Portal -> Prescriptions
 
-**Location:** Doctor Portal → Patients
+#### Create Prescription
+1. Click **New Prescription**
+2. Select patient
+3. Add medications:
+   - Drug name
+   - Dosage
+   - Frequency
+   - Duration
+4. **Drug Interaction Warning:** System automatically checks for dangerous drug interactions and displays warnings
+5. Add instructions
+6. Click **Save**
 
-#### View Your Patients
-1. Navigate to **Patients**
-2. Search by name or condition
-3. Click on a patient card for details
+### Lab Test Management
 
-#### View Patient Details
-1. Click on a patient card
-2. Modal shows:
-   - Personal information
-   - Medical history
-   - Contact details
-   - Last visit and next appointment
-3. Click **View Full Records** to access complete history
+**Location:** Doctor Portal -> Lab Tests
 
-### Writing Prescriptions
+#### Order Lab Test
+1. Click **Order Test**
+2. Select patient
+3. Choose test type:
+   - Blood Tests (CBC, Lipid Panel, etc.)
+   - Urine Analysis
+   - Imaging (X-Ray, MRI, CT)
+   - Other specialized tests
+4. Add clinical notes
+5. Set priority level
+6. Click **Submit Order**
 
-**Location:** Doctor Portal → Prescriptions
+#### View Results
+1. Find the test in the list
+2. Click to view results
+3. Add interpretation notes
+4. Mark as reviewed
 
-#### Create New Prescription
-1. Click **New Prescription** button
-2. Select the patient
-3. Enter diagnosis
-4. Add medications:
-   - Click **Add Medication**
-   - Enter: Name, Dosage, Frequency, Duration
-   - Repeat for multiple medications
-5. Add special instructions (optional)
-6. Set validity period
-7. Click **Create Prescription**
+### Vital Signs
 
-#### View Existing Prescriptions
-1. Use search to find prescriptions
-2. Click **View** to see details
-3. Click **Print** to print prescription
-4. Click **Download** for PDF version
+**Location:** Doctor Portal -> Vitals
 
-### Managing Medical Records
+#### Record Vital Signs
+1. Click **Record Vitals**
+2. Select patient
+3. Enter measurements:
+   - Blood Pressure (systolic/diastolic)
+   - Heart Rate (bpm)
+   - Temperature (F or C)
+   - Respiratory Rate
+   - Oxygen Saturation (SpO2)
+   - Weight and Height
+4. Add notes for abnormal values
+5. Click **Save**
 
-**Location:** Doctor Portal → Records
+#### View Vital Trends
+- Select a patient
+- View historical data in charts
+- Identify patterns and concerns
 
-#### Add New Record
-1. Click **Add Record** button
+### Medical Records
+
+**Location:** Doctor Portal -> Records
+
+#### Create Record
+1. Click **Add Record**
 2. Select patient
 3. Choose record type:
    - Diagnosis
    - Lab Report
    - Imaging
-   - Vaccination
-   - Surgery
-4. Enter title and description
-5. Set record date
-6. Attach files (drag & drop supported)
-7. Click **Create Record**
-
-#### View Records
-1. Use filters to find specific record types
-2. Click **View** for details
-3. Click **Download** for attachments
+   - Procedure
+   - Follow-up Note
+4. Enter details
+5. Attach files if needed
+6. Click **Save**
 
 ### Schedule Management
 
-**Location:** Doctor Portal → Schedule
+**Location:** Doctor Portal -> Schedule
 
 #### Set Weekly Availability
 1. Navigate to **Schedule**
-2. For each day of the week:
-   - Toggle availability on/off
+2. For each day:
+   - Toggle available/unavailable
    - Set start time
    - Set end time
-3. Set appointment slot duration (15-60 minutes)
+3. Set slot duration (15/30/45/60 min)
 4. Click **Save Schedule**
-
-#### Manage Leave
-1. View upcoming leaves in the sidebar
-2. Click **Add Leave** to request time off
-3. Enter leave dates and reason
-4. Submit request
 
 ---
 
@@ -444,150 +446,97 @@ The patient dashboard provides an overview of your healthcare status.
 **Key Information:**
 - Upcoming Appointments
 - Active Prescriptions
-- Medical Records Count
-- Total Visits This Year
+- Recent Lab Tests
+- Vital Signs Summary
 
-**Health Metrics:**
-- Blood Pressure
-- Heart Rate
-- Blood Sugar
-- Status indicators for each metric
+### Booking Appointments
 
-### Booking an Appointment
+**Location:** Patient Portal -> Book Appointment
 
-**Location:** Patient Portal → Book Appointment
-
-#### Step 1: Select a Doctor
-1. Navigate to **Book Appointment**
-2. Browse available doctors
-3. Filter by department if needed
-4. View doctor details:
+#### Step 1: Select Doctor
+1. Browse available doctors
+2. Filter by department
+3. View doctor details:
    - Specialization
    - Experience
-   - Rating
    - Consultation Fee
-5. Click **Select** on your chosen doctor
+4. Click **Select**
 
 #### Step 2: Choose Date & Time
-1. Select a date from the calendar
-2. Choose an available time slot
-3. Select appointment type:
-   - **Consultation** - First visit or new concern
-   - **Follow-up** - Continuing treatment
-   - **Emergency** - Urgent care needed
+1. Select date from calendar
+2. Pick available time slot
+3. Choose appointment type
 
-#### Step 3: Confirm Booking
-1. Review appointment details
-2. Enter your symptoms/reason for visit
-3. Review consultation fee
-4. Click **Confirm Booking**
-5. You'll receive a confirmation message
+#### Step 3: Confirm
+1. Review details
+2. Enter reason for visit
+3. Click **Confirm Booking**
 
 ### Managing Appointments
 
-**Location:** Patient Portal → Appointments
+**Location:** Patient Portal -> Appointments
 
-#### View Your Appointments
-1. Navigate to **Appointments**
-2. See upcoming and past appointments
-3. Filter by: All, Upcoming, Completed, Cancelled
+- View upcoming and past appointments
+- Cancel appointments if needed
+- View appointment details
 
-#### Cancel an Appointment
-1. Find the appointment you want to cancel
-2. Click **Cancel Appointment**
-3. Confirm cancellation in the popup
-4. Appointment status changes to "Cancelled"
+### Prescriptions
 
-#### Join Video Consultation
-1. Find your confirmed appointment
-2. Click **Join Video Call** when it's time
-3. Ensure your camera and microphone are enabled
+**Location:** Patient Portal -> Prescriptions
 
-### Viewing Prescriptions
+- View all prescriptions
+- See medication details and instructions
+- Print or download as PDF
 
-**Location:** Patient Portal → Prescriptions
+### Lab Tests
 
-#### View Active Prescriptions
-1. Navigate to **Prescriptions**
-2. Active prescriptions are shown by default
-3. Use filter to view: All, Active, Expired
+**Location:** Patient Portal -> Lab Tests
 
-#### View Prescription Details
-1. Click **View** on a prescription card
-2. See full details:
-   - Doctor information
-   - Diagnosis
-   - All medications with dosage instructions
-   - Special instructions
-   - Validity period
+- View ordered tests
+- Check test status (Pending, In Progress, Completed)
+- View results when available
+- Download results as PDF
 
-#### Download/Print Prescription
-1. Open prescription details
-2. Click **Print** for physical copy
-3. Click **Download PDF** for digital copy
+### Vital Signs
 
-### Accessing Medical Records
+**Location:** Patient Portal -> Vitals
 
-**Location:** Patient Portal → Records
+- View your vital signs history
+- See trends in charts:
+  - Blood Pressure over time
+  - Heart Rate patterns
+  - Weight changes
 
-#### View Your Records
-1. Navigate to **Records**
-2. See record counts by type:
-   - Diagnoses
-   - Lab Reports
-   - Imaging
-   - Vaccinations
-3. Filter by record type
+### Medical Records
 
-#### View Record Details
-1. Click **View Details** on a record
-2. See full information:
-   - Record type and date
-   - Doctor who created it
-   - Description
-   - Attached files
+**Location:** Patient Portal -> Records
 
-#### Download Records
-1. Click **Download** on any record
-2. Files download to your device
+- Access all your health records
+- Filter by type
+- Download records as PDF
 
 ### Profile Management
 
-**Location:** Patient Portal → Profile
+**Location:** Patient Portal -> Profile
 
-#### Update Personal Information
-1. Navigate to **Profile**
-2. Click **Personal Information** tab
-3. Update your details:
-   - Full Name
-   - Email
-   - Phone
-   - Date of Birth
-   - Gender
-   - Blood Group
-   - Address
-4. Click **Save Changes**
+#### Personal Information
+- Name, Email, Phone
+- Date of Birth, Gender
+- Address
 
-#### Update Medical Information
-1. Click **Medical Information** tab
-2. Enter:
-   - Known Allergies
-   - Chronic Conditions
-3. Click **Save Changes**
+#### Medical Information
+- Blood Type
+- Allergies
+- Current Medications
+- Medical Conditions
 
-#### Update Emergency Contact
-1. Click **Emergency Contact** tab
-2. Enter:
-   - Contact Name
-   - Contact Phone Number
-3. Click **Save Changes**
+#### Emergency Contact
+- Contact Name
+- Relationship
+- Phone Number
 
-#### Change Password
-1. Click **Security** tab
-2. Enter current password
-3. Enter new password
-4. Confirm new password
-5. Click **Update Password**
+#### Security
+- Change Password
 
 ---
 
@@ -598,36 +547,27 @@ The patient dashboard provides an overview of your healthcare status.
 #### "Cannot connect to database"
 1. Verify MySQL is running
 2. Check DATABASE_URL in `.env`
-3. Ensure database exists: `CREATE DATABASE nhms;`
+3. Ensure database exists
 
 #### "Invalid credentials" on login
 1. Verify email is correct
 2. Check password (case-sensitive)
 3. Run `npm run db:seed` to reset test accounts
 
-#### Page shows 404 error
-1. Check you're using the correct URL
-2. Valid routes:
-   - `/login` - Login page
-   - `/admin` - Admin portal
-   - `/doctor` - Doctor portal
-   - `/patient` - Patient portal
-
 #### Hydration warnings in console
 These are caused by browser extensions (Bitdefender, Grammarly, etc.) and are harmless. The application works normally.
 
-#### "Too many redirects" error
-1. Clear browser cookies for localhost
-2. Press Ctrl+Shift+Delete
-3. Select "Cookies" and clear
-4. Try again
+#### Currency not displaying correctly
+1. Go to Admin -> Settings -> Regional
+2. Select your currency
+3. Save and refresh the page
 
 ### Getting Help
 
-If you encounter issues not covered here:
-1. Check the console for error messages (F12 → Console)
-2. Review the application logs
-3. Contact system administrator
+If you encounter issues:
+1. Check the browser console (F12 -> Console)
+2. Review application logs
+3. Contact: support@nhms.com
 
 ---
 
@@ -639,57 +579,57 @@ If you encounter issues not covered here:
 A: Yes, the system supports multi-tenancy. Each hospital has separate data.
 
 **Q: Is my data secure?**
-A: Yes, passwords are encrypted using bcrypt, and sessions use secure JWT tokens.
+A: Yes, passwords are encrypted using bcrypt, and sessions use secure tokens.
+
+**Q: What currencies are supported?**
+A: 25+ currencies including USD, EUR, GBP, BDT, INR, and many more.
 
 **Q: Can I use this on mobile?**
-A: Yes, the interface is responsive and works on tablets and mobile devices.
+A: Yes, the interface is fully responsive.
 
 ### Admin Questions
 
-**Q: How do I add a new department?**
-A: Go to Admin Portal → Departments → Add Department
+**Q: How do I change the currency?**
+A: Go to Settings -> Regional -> Select your currency
 
-**Q: Can I customize the hospital branding?**
-A: Yes, go to Settings → Branding to change colors and logo.
+**Q: How do I view audit logs?**
+A: Navigate to Admin -> Audit Logs
 
-**Q: How do I generate reports?**
-A: Navigate to Reports, select the time period, and click Export.
+**Q: How do I manage emergency cases?**
+A: Go to Admin -> Emergency to view and manage triage queue
 
 ### Doctor Questions
 
-**Q: How do I set my availability?**
-A: Go to Doctor Portal → Schedule and configure your weekly hours.
+**Q: How do I check for drug interactions?**
+A: The system automatically checks when creating prescriptions and shows warnings.
 
-**Q: Can I see patient history?**
-A: Yes, click on any patient to view their complete medical history.
+**Q: How do I order lab tests?**
+A: Go to Lab Tests -> Order Test and fill in the details.
 
-**Q: How do I write a prescription?**
-A: Go to Prescriptions → New Prescription and fill in the details.
+**Q: How do I record vital signs?**
+A: Go to Vitals -> Record Vitals and enter the measurements.
 
 ### Patient Questions
 
 **Q: How do I book an appointment?**
-A: Go to Patient Portal → Book Appointment and follow the 3-step process.
+A: Go to Book Appointment and follow the 3-step process.
 
-**Q: Can I cancel an appointment?**
-A: Yes, go to Appointments, find your booking, and click Cancel.
+**Q: How do I view my lab results?**
+A: Navigate to Lab Tests to see all your test results.
 
-**Q: How do I view my prescriptions?**
-A: Navigate to Prescriptions to see all active and past prescriptions.
-
-**Q: Can I download my medical records?**
-A: Yes, go to Records and click Download on any record.
+**Q: How do I track my vital signs?**
+A: Go to Vitals to see your vital signs history and trends.
 
 ---
 
 ## Support
 
-For technical support or feature requests, please contact:
+For technical support or feature requests:
 
-- **Email:** support@healthcarepro.com
-- **Documentation:** [GitHub Repository](https://github.com/your-repo)
+- **Email:** support@nhms.com
+- **Documentation:** See README.md
 - **Issues:** Report bugs via GitHub Issues
 
 ---
 
-*This manual covers HealthCare Pro Hospital Management System v1.0.0*
+*This manual covers NHMS - National Health Management System v2.0.0*
