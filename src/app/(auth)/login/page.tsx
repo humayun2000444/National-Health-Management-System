@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import {
@@ -15,14 +16,16 @@ import {
   EyeOff,
   CheckCircle2,
   Star,
-  Building2,
   Clock,
-  Sparkles,
-  Activity,
   Calendar,
   FileText,
   CreditCard,
   TestTube,
+  Activity,
+  HeartHandshake,
+  Phone,
+  Ambulance,
+  MapPin,
 } from "lucide-react";
 
 type UserType = "patient" | "doctor" | "admin";
@@ -33,20 +36,20 @@ const userTypes = [
     label: "Patient",
     icon: <User className="h-5 w-5" />,
     description: "Book appointments & access records",
-    gradient: "from-blue-500 to-cyan-500",
-    bgLight: "bg-blue-50",
-    borderActive: "border-blue-500",
-    ring: "ring-blue-500/20",
+    gradient: "from-teal-500 to-emerald-500",
+    bgLight: "bg-teal-50",
+    borderActive: "border-teal-500",
+    ring: "ring-teal-500/20",
   },
   {
     type: "doctor" as UserType,
     label: "Doctor",
     icon: <Stethoscope className="h-5 w-5" />,
     description: "Manage patients & prescriptions",
-    gradient: "from-emerald-500 to-teal-500",
-    bgLight: "bg-emerald-50",
-    borderActive: "border-emerald-500",
-    ring: "ring-emerald-500/20",
+    gradient: "from-sky-500 to-blue-500",
+    bgLight: "bg-sky-50",
+    borderActive: "border-sky-500",
+    ring: "ring-sky-500/20",
   },
   {
     type: "admin" as UserType,
@@ -68,6 +71,19 @@ const features = [
   { icon: <Activity className="h-5 w-5" />, text: "Emergency Triage System" },
 ];
 
+interface HospitalInfo {
+  name: string;
+  logo: string | null;
+  phone: string | null;
+  address: string | null;
+  primaryColor: string;
+  secondaryColor: string;
+  accentColor: string;
+  showHospitalName: boolean;
+  showTagline: boolean;
+  tagline: string;
+}
+
 export default function LoginPage() {
   const router = useRouter();
   const [selectedType, setSelectedType] = useState<UserType>("patient");
@@ -76,6 +92,29 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [hospitalInfo, setHospitalInfo] = useState<HospitalInfo | null>(null);
+
+  useEffect(() => {
+    fetch("/api/public/hospital")
+      .then((res) => res.json())
+      .then((data) => setHospitalInfo(data))
+      .catch((err) => console.error("Failed to fetch hospital info:", err));
+  }, []);
+
+  const hospitalName = hospitalInfo?.name || "City General Hospital";
+  const hospitalLogo = hospitalInfo?.logo;
+  const hospitalPhone = hospitalInfo?.phone || "+880 1234-567890";
+  const showHospitalName = hospitalInfo?.showHospitalName ?? true;
+  const showTagline = hospitalInfo?.showTagline ?? true;
+  const tagline = hospitalInfo?.tagline || "Caring for You & Your Family";
+
+  // Branding colors
+  const primaryColor = hospitalInfo?.primaryColor || "#0d9488";
+  const secondaryColor = hospitalInfo?.secondaryColor || "#059669";
+
+  // Gradient styles using dynamic colors
+  const gradientStyle = { background: `linear-gradient(to right, ${primaryColor}, ${secondaryColor})` };
+  const gradientBrStyle = { background: `linear-gradient(to bottom right, ${primaryColor}, ${secondaryColor})` };
 
   const selectedUserType = userTypes.find((t) => t.type === selectedType)!;
 
@@ -107,8 +146,8 @@ export default function LoginPage() {
     <div className="min-h-screen flex">
       {/* Left Side - Branding */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
-        {/* Gradient Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-blue-700 to-cyan-600" />
+        {/* Gradient Background - Dynamic theme */}
+        <div className="absolute inset-0" style={gradientBrStyle} />
 
         {/* Pattern Overlay */}
         <div className="absolute inset-0 opacity-10">
@@ -119,43 +158,59 @@ export default function LoginPage() {
 
         {/* Floating Shapes */}
         <div className="absolute top-20 left-20 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 right-20 w-96 h-96 bg-cyan-400/20 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 left-1/3 w-48 h-48 bg-blue-400/20 rounded-full blur-2xl" />
+        <div className="absolute bottom-20 right-20 w-96 h-96 bg-emerald-400/20 rounded-full blur-3xl" />
+        <div className="absolute top-1/2 left-1/3 w-48 h-48 bg-teal-400/20 rounded-full blur-2xl" />
 
         {/* Content */}
         <div className="relative z-10 flex flex-col justify-between p-12 w-full">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3">
-            <div className="bg-white/20 backdrop-blur-sm p-2.5 rounded-xl">
-              <Building2 className="h-7 w-7 text-white" />
-            </div>
-            <div>
-              <span className="text-2xl font-bold text-white">NHMS</span>
-              <span className="block text-sm text-blue-200">National Health Management</span>
-            </div>
+            {hospitalLogo ? (
+              <div className={`rounded-xl overflow-hidden bg-white/20 backdrop-blur-sm border border-white/30 ${showHospitalName ? 'w-20 h-[45px]' : 'w-28 h-[63px]'}`}>
+                <Image
+                  src={hospitalLogo}
+                  alt={hospitalName}
+                  width={112}
+                  height={63}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            ) : (
+              <div className="bg-white/20 backdrop-blur-sm p-2.5 rounded-xl border border-white/30">
+                <HeartHandshake className="h-7 w-7 text-white" />
+              </div>
+            )}
+            {showHospitalName && (
+              <div>
+                <span className="text-2xl font-bold text-white">{hospitalName}</span>
+                {showTagline && (
+                  <span className="block text-sm text-teal-100">{tagline}</span>
+                )}
+              </div>
+            )}
           </Link>
 
           {/* Main Content */}
           <div className="space-y-8">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-white/90 text-sm font-medium">
-              <Sparkles className="h-4 w-4" />
-              Complete Hospital Management Solution
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-white/90 text-sm font-medium border border-white/20">
+              <HeartHandshake className="h-4 w-4" />
+              Complete Hospital Management System
             </div>
 
             <h1 className="text-4xl xl:text-5xl font-bold text-white leading-tight">
-              National Health Management System
+              Welcome to<br />{hospitalName}
             </h1>
 
-            <p className="text-xl text-blue-100 leading-relaxed max-w-lg">
-              Manage appointments, prescriptions, billing, lab tests, vital signs,
-              and emergency triage - all in one powerful platform.
+            <p className="text-xl text-teal-100 leading-relaxed max-w-lg">
+              Access your healthcare dashboard. Book appointments, view prescriptions,
+              check lab results, and manage your health records securely.
             </p>
 
             {/* Features */}
             <div className="space-y-4">
               {features.map((feature, i) => (
                 <div key={i} className="flex items-center gap-3 text-white/90">
-                  <div className="p-1 bg-white/20 rounded-lg">
+                  <div className="p-1.5 bg-white/20 rounded-lg">
                     {feature.icon}
                   </div>
                   <span>{feature.text}</span>
@@ -164,51 +219,67 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* Stats */}
+          {/* Contact Info */}
           <div className="flex items-center gap-8">
-            <div>
-              <p className="text-3xl font-bold text-white">3</p>
-              <p className="text-blue-200 text-sm">User Portals</p>
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-white/20 rounded-lg">
+                <Phone className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <p className="text-sm text-teal-100">Call Us</p>
+                <p className="text-white font-semibold">{hospitalPhone}</p>
+              </div>
             </div>
             <div className="w-px h-12 bg-white/20" />
-            <div>
-              <p className="text-3xl font-bold text-white">25+</p>
-              <p className="text-blue-200 text-sm">Currencies</p>
-            </div>
-            <div className="w-px h-12 bg-white/20" />
-            <div>
-              <p className="text-3xl font-bold text-white">24/7</p>
-              <p className="text-blue-200 text-sm">Available</p>
-            </div>
-            <div className="w-px h-12 bg-white/20" />
-            <div>
-              <p className="text-3xl font-bold text-white">100%</p>
-              <p className="text-blue-200 text-sm">Secure</p>
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-rose-500/80 rounded-lg">
+                <Ambulance className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <p className="text-sm text-teal-100">Emergency</p>
+                <p className="text-white font-semibold">+880 1234-999999</p>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Right Side - Login Form */}
-      <div className="flex-1 flex items-center justify-center p-6 sm:p-8 lg:p-12 bg-slate-50">
+      <div className="flex-1 flex items-center justify-center p-6 sm:p-8 lg:p-12 bg-gradient-to-b from-white to-teal-50/30">
         <div className="w-full max-w-md">
           {/* Mobile Logo */}
           <div className="lg:hidden mb-8 text-center">
             <Link href="/" className="inline-flex items-center gap-3">
-              <div className="bg-gradient-to-r from-blue-600 to-cyan-500 p-2.5 rounded-xl">
-                <Building2 className="h-6 w-6 text-white" />
-              </div>
-              <div className="text-left">
-                <span className="text-xl font-bold text-slate-900">NHMS</span>
-                <span className="block text-xs text-slate-500">National Health Management</span>
-              </div>
+              {hospitalLogo ? (
+                <div className={`rounded-xl overflow-hidden shadow-lg border ${showHospitalName ? 'w-16 h-9' : 'w-20 h-[45px]'}`} style={{ borderColor: `${primaryColor}20` }}>
+                  <Image
+                    src={hospitalLogo}
+                    alt={hospitalName}
+                    width={80}
+                    height={45}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ) : (
+                <div className="p-2.5 rounded-xl shadow-lg" style={gradientStyle}>
+                  <HeartHandshake className="h-6 w-6 text-white" />
+                </div>
+              )}
+              {showHospitalName && (
+                <div className="text-left">
+                  <span className="text-xl font-bold text-slate-900">{hospitalName}</span>
+                  {showTagline && (
+                    <span className="block text-xs" style={{ color: primaryColor }}>{tagline}</span>
+                  )}
+                </div>
+              )}
             </Link>
           </div>
 
           {/* Header */}
           <div className="text-center lg:text-left mb-8">
             <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">
-              Sign in to NHMS
+              Sign in to your account
             </h2>
             <p className="text-slate-600">
               Access your healthcare management dashboard
@@ -233,7 +304,7 @@ export default function LoginPage() {
                   }`}
                 >
                   <div
-                    className={`w-11 h-11 bg-gradient-to-r ${type.gradient} rounded-xl flex items-center justify-center text-white mx-auto mb-2 shadow-lg shadow-slate-200`}
+                    className={`w-11 h-11 bg-gradient-to-r ${type.gradient} rounded-xl flex items-center justify-center text-white mx-auto mb-2 shadow-lg`}
                   >
                     {type.icon}
                   </div>
@@ -241,7 +312,7 @@ export default function LoginPage() {
                     {type.label}
                   </p>
                   {selectedType === type.type && (
-                    <div className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-full flex items-center justify-center">
+                    <div className={`absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-r ${type.gradient} rounded-full flex items-center justify-center`}>
                       <CheckCircle2 className="h-3 w-3 text-white" />
                     </div>
                   )}
@@ -272,7 +343,7 @@ export default function LoginPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your email"
                   required
-                  className="w-full pl-12 pr-4 py-3.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-900 placeholder-slate-400"
+                  className="w-full pl-12 pr-4 py-3.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all text-slate-900 placeholder-slate-400"
                 />
               </div>
             </div>
@@ -290,7 +361,7 @@ export default function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
                   required
-                  className="w-full pl-12 pr-12 py-3.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-900 placeholder-slate-400"
+                  className="w-full pl-12 pr-12 py-3.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all text-slate-900 placeholder-slate-400"
                 />
                 <button
                   type="button"
@@ -307,13 +378,14 @@ export default function LoginPage() {
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
-                  className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 focus:ring-offset-0"
+                  className="w-4 h-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500 focus:ring-offset-0"
                 />
                 <span className="text-sm text-slate-600">Remember me</span>
               </label>
               <a
                 href="#"
-                className="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
+                className="text-sm font-medium transition-colors hover:opacity-80"
+                style={{ color: primaryColor }}
               >
                 Forgot password?
               </a>
@@ -323,7 +395,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className={`w-full py-4 bg-gradient-to-r ${selectedUserType.gradient} text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-blue-500/25 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed`}
+              className={`w-full py-4 bg-gradient-to-r ${selectedUserType.gradient} text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-teal-500/25 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed`}
             >
               {isLoading ? (
                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -337,7 +409,7 @@ export default function LoginPage() {
           </form>
 
           {/* Demo Credentials */}
-          <div className="mt-8 p-5 bg-white rounded-2xl border border-slate-200 shadow-sm">
+          <div className="mt-8 p-5 bg-white rounded-2xl border shadow-sm" style={{ borderColor: `${primaryColor}20` }}>
             <div className="flex items-center gap-2 mb-3">
               <Star className="h-4 w-4 text-amber-500" />
               <p className="text-sm font-semibold text-slate-700">
@@ -362,10 +434,11 @@ export default function LoginPage() {
 
           {/* Register Link */}
           <p className="mt-8 text-center text-sm text-slate-600">
-            New to NHMS?{" "}
+            New patient?{" "}
             <Link
               href="/register"
-              className="text-blue-600 hover:text-blue-700 font-semibold transition-colors"
+              className="font-semibold transition-colors hover:opacity-80"
+              style={{ color: primaryColor }}
             >
               Create Patient Account
             </Link>
@@ -383,7 +456,9 @@ export default function LoginPage() {
           <div className="mt-6 text-center">
             <Link
               href="/"
-              className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-700 transition-colors"
+              className="inline-flex items-center gap-2 text-sm text-slate-500 transition-colors"
+              onMouseEnter={(e) => e.currentTarget.style.color = primaryColor}
+              onMouseLeave={(e) => e.currentTarget.style.color = ''}
             >
               <ArrowRight className="h-4 w-4 rotate-180" />
               Back to Home

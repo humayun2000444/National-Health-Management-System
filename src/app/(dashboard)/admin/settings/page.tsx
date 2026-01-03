@@ -49,6 +49,9 @@ interface HospitalSettings {
     currency: string;
     timezone: string;
     dateFormat: string;
+    showHospitalName: boolean;
+    showTagline: boolean;
+    tagline: string;
   };
 }
 
@@ -106,6 +109,11 @@ export default function SettingsPage() {
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Logo display options
+  const [showHospitalName, setShowHospitalName] = useState(true);
+  const [showTagline, setShowTagline] = useState(true);
+  const [tagline, setTagline] = useState("Caring for You & Your Family");
+
   useEffect(() => {
     fetchSettings();
   }, []);
@@ -142,6 +150,9 @@ export default function SettingsPage() {
         setCurrency(data.settings.currency ?? "USD");
         setTimezone(data.settings.timezone ?? "UTC");
         setDateFormat(data.settings.dateFormat ?? "MM/DD/YYYY");
+        setShowHospitalName(data.settings.showHospitalName ?? true);
+        setShowTagline(data.settings.showTagline ?? true);
+        setTagline(data.settings.tagline ?? "Caring for You & Your Family");
       }
     } catch (err) {
       setError("Failed to load settings");
@@ -226,6 +237,17 @@ export default function SettingsPage() {
             phone,
             address,
             website,
+            settings: {
+              ...features,
+              appointmentReminder,
+              replyToEmail,
+              currency,
+              timezone,
+              dateFormat,
+              showHospitalName,
+              showTagline,
+              tagline,
+            },
           };
           break;
         case "branding":
@@ -233,6 +255,17 @@ export default function SettingsPage() {
             primaryColor,
             secondaryColor,
             accentColor,
+            settings: {
+              ...features,
+              appointmentReminder,
+              replyToEmail,
+              currency,
+              timezone,
+              dateFormat,
+              showHospitalName,
+              showTagline,
+              tagline,
+            },
           };
           break;
         case "features":
@@ -388,8 +421,8 @@ export default function SettingsPage() {
                       <label className="block text-sm font-medium text-slate-700 mb-2">
                         Hospital Logo
                       </label>
-                      <div className="flex items-center gap-4">
-                        <div className="w-24 h-24 bg-slate-100 rounded-xl flex items-center justify-center border-2 border-dashed border-slate-300 overflow-hidden">
+                      <div className="flex items-start gap-6">
+                        <div className="w-40 h-[90px] bg-slate-100 rounded-xl flex items-center justify-center border-2 border-dashed border-slate-300 overflow-hidden flex-shrink-0">
                           {logo ? (
                             <img
                               src={logo}
@@ -397,47 +430,113 @@ export default function SettingsPage() {
                               className="w-full h-full object-cover"
                             />
                           ) : (
-                            <Building2 className="h-8 w-8 text-slate-400" />
+                            <Building2 className="h-10 w-10 text-slate-400" />
                           )}
                         </div>
-                        <div className="space-y-2">
-                          <input
-                            ref={fileInputRef}
-                            type="file"
-                            accept="image/png,image/jpeg,image/gif,image/webp"
-                            onChange={handleLogoUpload}
-                            className="hidden"
-                            id="logo-upload"
-                          />
-                          <div className="flex gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => fileInputRef.current?.click()}
-                              disabled={isUploadingLogo}
-                            >
-                              {isUploadingLogo ? (
-                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                              ) : (
-                                <Upload className="h-4 w-4 mr-2" />
-                              )}
-                              {logo ? "Change Logo" : "Upload Logo"}
-                            </Button>
-                            {logo && (
+                        <div className="flex-1 space-y-4">
+                          <div className="space-y-2">
+                            <input
+                              ref={fileInputRef}
+                              type="file"
+                              accept="image/png,image/jpeg,image/gif,image/webp"
+                              onChange={handleLogoUpload}
+                              className="hidden"
+                              id="logo-upload"
+                            />
+                            <div className="flex gap-2">
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={handleRemoveLogo}
+                                onClick={() => fileInputRef.current?.click()}
                                 disabled={isUploadingLogo}
-                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
                               >
-                                <Trash2 className="h-4 w-4" />
+                                {isUploadingLogo ? (
+                                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                ) : (
+                                  <Upload className="h-4 w-4 mr-2" />
+                                )}
+                                {logo ? "Change Logo" : "Upload Logo"}
                               </Button>
+                              {logo && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={handleRemoveLogo}
+                                  disabled={isUploadingLogo}
+                                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              )}
+                            </div>
+                            <p className="text-xs text-slate-500">
+                              PNG, JPG, GIF, WebP up to 2MB. Recommended: 16:9 ratio (e.g., 320x180px or 640x360px)
+                            </p>
+                          </div>
+
+                          {/* Logo Display Options */}
+                          <div className="pt-3 border-t border-slate-200 space-y-3">
+                            <p className="text-sm font-medium text-slate-700">Display Options</p>
+
+                            <label className="flex items-center gap-3 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={showHospitalName}
+                                onChange={(e) => setShowHospitalName(e.target.checked)}
+                                className="w-4 h-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500"
+                              />
+                              <span className="text-sm text-slate-600">
+                                Show hospital name next to logo
+                              </span>
+                            </label>
+
+                            <label className="flex items-center gap-3 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={showTagline}
+                                onChange={(e) => setShowTagline(e.target.checked)}
+                                className="w-4 h-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500"
+                              />
+                              <span className="text-sm text-slate-600">
+                                Show tagline below name
+                              </span>
+                            </label>
+
+                            {showTagline && (
+                              <Input
+                                label="Tagline"
+                                value={tagline}
+                                onChange={(e) => setTagline(e.target.value)}
+                                placeholder="e.g., Caring for You & Your Family"
+                              />
                             )}
                           </div>
-                          <p className="text-xs text-slate-500">
-                            PNG, JPG, GIF, WebP up to 2MB. Recommended: 512x512px
-                          </p>
+
+                          {/* Logo Preview */}
+                          {logo && (
+                            <div className="pt-3 border-t border-slate-200">
+                              <p className="text-sm font-medium text-slate-700 mb-2">Preview</p>
+                              <div className="p-4 bg-slate-50 rounded-lg">
+                                <div className="flex items-center gap-3">
+                                  <div className={`rounded-xl overflow-hidden border border-slate-200 ${showHospitalName ? 'w-20 h-[45px]' : 'w-28 h-[63px]'}`}>
+                                    <img
+                                      src={logo}
+                                      alt="Preview"
+                                      className="w-full h-full object-cover"
+                                    />
+                                  </div>
+                                  {showHospitalName && (
+                                    <div>
+                                      <p className="font-bold text-slate-800">{hospitalName}</p>
+                                      {showTagline && tagline && (
+                                        <p className="text-xs text-teal-600">{tagline}</p>
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>

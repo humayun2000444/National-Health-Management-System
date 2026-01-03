@@ -75,6 +75,10 @@ interface HospitalInfo {
   slug: string;
   logo: string | null;
   primaryColor: string;
+  secondaryColor?: string;
+  showHospitalName?: boolean;
+  showTagline?: boolean;
+  tagline?: string;
 }
 
 export function Sidebar() {
@@ -82,6 +86,9 @@ export function Sidebar() {
   const { data: session } = useSession();
   const [collapsed, setCollapsed] = useState(false);
   const [hospitalInfo, setHospitalInfo] = useState<HospitalInfo | null>(null);
+
+  // Branding colors
+  const primaryColor = hospitalInfo?.primaryColor || "#0d9488";
 
   useEffect(() => {
     const fetchHospitalInfo = async () => {
@@ -121,19 +128,21 @@ export function Sidebar() {
       {/* Logo */}
       <div className="flex items-center justify-between h-16 px-4 border-b border-slate-800">
         {!collapsed && (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-1 min-w-0">
             {hospitalInfo?.logo ? (
               <img
                 src={hospitalInfo.logo}
                 alt={hospitalInfo.name}
-                className="h-8 w-8 rounded-lg object-cover"
+                className={`rounded-lg object-cover ${hospitalInfo?.showHospitalName !== false ? 'w-14 h-8' : 'w-20 h-[45px]'}`}
               />
             ) : (
-              <Heart className="h-8 w-8 text-blue-500" />
+              <Heart className="h-8 w-8 flex-shrink-0" style={{ color: primaryColor }} />
             )}
-            <span className="text-lg font-bold truncate">
-              {hospitalInfo?.name || session?.user?.hospitalName || "Hospital"}
-            </span>
+            {hospitalInfo?.showHospitalName !== false && (
+              <span className="text-lg font-bold truncate">
+                {hospitalInfo?.name || session?.user?.hospitalName || "Hospital"}
+              </span>
+            )}
           </div>
         )}
         {collapsed && (
@@ -141,16 +150,16 @@ export function Sidebar() {
             <img
               src={hospitalInfo.logo}
               alt={hospitalInfo?.name || "Hospital"}
-              className="h-8 w-8 rounded-lg object-cover mx-auto"
+              className="w-12 h-[27px] rounded-lg object-cover mx-auto"
             />
           ) : (
-            <Heart className="h-8 w-8 text-blue-500 mx-auto" />
+            <Heart className="h-8 w-8 mx-auto" style={{ color: primaryColor }} />
           )
         )}
         <button
           onClick={() => setCollapsed(!collapsed)}
           className={cn(
-            "p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition-colors",
+            "p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition-colors flex-shrink-0",
             collapsed && "mx-auto mt-2"
           )}
         >
@@ -175,11 +184,10 @@ export function Sidebar() {
               href={item.href}
               className={cn(
                 "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors",
-                isActive
-                  ? "bg-blue-600 text-white"
-                  : "text-slate-400 hover:bg-slate-800 hover:text-white",
+                !isActive && "text-slate-400 hover:bg-slate-800 hover:text-white",
                 collapsed && "justify-center"
               )}
+              style={isActive ? { backgroundColor: primaryColor, color: 'white' } : undefined}
               title={collapsed ? item.name : undefined}
             >
               {item.icon}

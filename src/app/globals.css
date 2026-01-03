@@ -3,6 +3,25 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  /* Default branding colors (will be overridden by BrandingProvider) */
+  --color-primary: #0d9488;
+  --color-primary-light: #5eead4;
+  --color-primary-lighter: #ccfbf1;
+  --color-primary-dark: #0f766e;
+  --color-primary-darker: #115e59;
+  --color-primary-rgb: 13, 148, 136;
+
+  --color-secondary: #059669;
+  --color-secondary-light: #6ee7b7;
+  --color-secondary-lighter: #d1fae5;
+  --color-secondary-dark: #047857;
+  --color-secondary-rgb: 5, 150, 105;
+
+  --color-accent: #f59e0b;
+  --color-accent-light: #fcd34d;
+  --color-accent-lighter: #fef3c7;
+  --color-accent-rgb: 245, 158, 11;
 }
 
 @theme inline {
@@ -77,4 +96,85 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .animate-fadeIn {
   animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Branding color utilities */
+.bg-brand-primary {
+  background-color: var(--color-primary);
+}
+
+.bg-brand-primary-light {
+  background-color: var(--color-primary-light);
+}
+
+.bg-brand-primary-lighter {
+  background-color: var(--color-primary-lighter);
+}
+
+.bg-brand-secondary {
+  background-color: var(--color-secondary);
+}
+
+.bg-brand-secondary-light {
+  background-color: var(--color-secondary-light);
+}
+
+.bg-brand-accent {
+  background-color: var(--color-accent);
+}
+
+.text-brand-primary {
+  color: var(--color-primary);
+}
+
+.text-brand-primary-dark {
+  color: var(--color-primary-dark);
+}
+
+.text-brand-secondary {
+  color: var(--color-secondary);
+}
+
+.text-brand-accent {
+  color: var(--color-accent);
+}
+
+.border-brand-primary {
+  border-color: var(--color-primary);
+}
+
+.border-brand-primary-light {
+  border-color: var(--color-primary-light);
+}
+
+/* Gradient utilities using CSS variables */
+.bg-brand-gradient {
+  background: linear-gradient(to right, var(--color-primary), var(--color-secondary));
+}
+
+.bg-brand-gradient-br {
+  background: linear-gradient(to bottom right, var(--color-primary), var(--color-secondary));
+}
+
+/* Hover states */
+.hover\:bg-brand-primary-dark:hover {
+  background-color: var(--color-primary-dark);
+}
+
+.hover\:text-brand-primary:hover {
+  color: var(--color-primary);
+}
+
+/* Ring/shadow using brand colors */
+.ring-brand-primary {
+  --tw-ring-color: var(--color-primary);
+}
+
+.shadow-brand-primary {
+  box-shadow: 0 10px 25px -5px rgba(var(--color-primary-rgb), 0.25);
+}
+
+/* Focus styles with brand color */
+.focus\:ring-brand-primary:focus {
+  --tw-ring-color: var(--color-primary);
 }

@@ -53,16 +53,23 @@ export async function GET() {
       return NextResponse.json({ error: "Hospital not found" }, { status: 404 });
     }
 
-    // Parse settings and ensure currency is included
+    // Parse settings and ensure all defaults are included
     const settings = hospital.settings as Record<string, unknown> || {};
 
     return NextResponse.json({
       ...hospital,
+      // Include display settings at top level for sidebar
+      showHospitalName: settings.showHospitalName ?? true,
+      showTagline: settings.showTagline ?? true,
+      tagline: settings.tagline || "Caring for You & Your Family",
       settings: {
         ...settings,
         currency: settings.currency || "USD",
         timezone: settings.timezone || "UTC",
         dateFormat: settings.dateFormat || "MM/DD/YYYY",
+        showHospitalName: settings.showHospitalName ?? true,
+        showTagline: settings.showTagline ?? true,
+        tagline: settings.tagline || "Caring for You & Your Family",
       },
     });
   } catch (error) {
