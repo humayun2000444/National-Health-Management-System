@@ -4,13 +4,16 @@
   "private": true,
   "description": "National Health Management System - DIIT Health Center",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "npm run db:sync && next dev",
+    "build": "npm run db:sync && next build",
     "start": "next start",
     "lint": "eslint",
+    "db:sync": "npx tsx prisma/db-sync.ts",
     "db:push": "prisma db push",
     "db:seed": "npx tsx prisma/seed.ts",
-    "db:studio": "prisma studio"
+    "db:seed:full": "npx tsx prisma/seed.ts",
+    "db:studio": "prisma studio",
+    "db:reset": "prisma db push --force-reset && npm run db:seed"
   },
   "prisma": {
     "seed": "npx tsx prisma/seed.ts"
